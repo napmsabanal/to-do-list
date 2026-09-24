@@ -22,6 +22,10 @@ const trashPanel = document.getElementById("trashPanel");
 const trashList = document.getElementById("trashList");
 const restoreAllBtn = document.getElementById("restoreAllBtn");
 const emptyTrashBtn = document.getElementById("emptyTrashBtn");
+const streakEl = document.getElementById("streak");
+const STREAK_KEY = "taskflow.streakDays";
+let streakDays = [];
+
 const categoryInput = document.getElementById("categoryInput");
 const categoryFilter = document.getElementById("categoryFilter");
 
@@ -56,6 +60,7 @@ showRandomQuote();
 loadTheme();
 loadTasks();
 loadTrash();
+loadStreak();
 render();
 
 function showRandomQuote() {
@@ -274,9 +279,56 @@ function addTask() {
     render();
 }
 
+function getDateStr(date) {
+    return (
+        date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0")
+    );
+}
+
+function loadStreak() {
+    try {
+        streakDays = JSON.parse(localStorage.getItem(STREAK_KEY)) || [];
+    } catch (err) {
+        console.error("Could not load streak:", err);
+        streakDays = [];
+    }
+}
+
+function recordCompletion() {
+    const today = getDateStr(new Date());
+    if (streakDays.includes(today)) return;
+    streakDays.push(today);
+    try {
+        localStorage.setItem(STREAK_KEY, JSON.stringify(streakDays));
+    } catch (err) {
+        console.error("Could not save streak:", err);
+    }
+}
+
+function calculateStreak() {
+    const day = new Date();
+    if (!streakDays.includes(getDateStr(day))) day.setDate(day.getDate() - 1);
+    let count = 0;
+    while (streakDays.includes(getDateStr(day))) {
+        count++;
+        day.setDate(day.getDate() - 1);
+    }
+    return count;
+}
+
+function renderStreak() {
+    const count = calculateStreak();
+    streakEl.textContent = count > 0
+        ? "🔥 " + count + "-day streak"
+        : "Complete a task to start your streak";
+}
+
 function toggleTask(id) {
     const task = tasks.find((t) => t.id === id);
     if (task) task.completed = !task.completed;
+    if (task && task.completed) recordCompletion();
     saveTasks();
     render();
 }
@@ -308,6 +360,7 @@ clearCompletedBtn.addEventListener("click", () => {
 
 toggleAllBtn.addEventListener("click", () => {
     const allDone = tasks.every((t) => t.completed);
+    if (!allDone) recordCompletion();
     tasks.forEach((t) => (t.completed = !allDone));
     saveTasks();
     render();
@@ -429,7 +482,8 @@ function render() {
         toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
        
         allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
-
+    
+    renderStreak();
     renderTrash();
     updateProgress();
 }
