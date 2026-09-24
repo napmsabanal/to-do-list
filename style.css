@@ -682,6 +682,7 @@ body[data-bg="dots"] {
     }
 
     #priorityInput,
+    #categoryInput,
     #dueDateInput,
     #addTaskBtn {
         width: 100%;

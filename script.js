@@ -23,16 +23,17 @@ const trashList = document.getElementById("trashList");
 const restoreAllBtn = document.getElementById("restoreAllBtn");
 const emptyTrashBtn = document.getElementById("emptyTrashBtn");
 const streakEl = document.getElementById("streak");
-const STREAK_KEY = "taskflow.streakDays";
-let streakDays = [];
-
 const categoryInput = document.getElementById("categoryInput");
 const categoryFilter = document.getElementById("categoryFilter");
+const bgSelect = document.getElementById("bgSelect");
+const themeButtons = document.querySelectorAll(".theme-btn");
 
 const STORAGE_KEY = "taskflow.tasks";
 const THEME_KEY = "taskflow.theme";
 const TRASH_KEY = "taskflow.trash";
-const themeButtons = document.querySelectorAll(".theme-btn");
+const STREAK_KEY = "taskflow.streakDays";
+const BG_KEY = "taskflow.background";
+
 const QUOTES = [
     "Start where you are. Use what you have. Do what you can.",
     "Small steps every day add up to big results.",
@@ -54,6 +55,8 @@ let sortBy = "priority";
 let trash = [];
 let trashOpen = false;
 let activeCategory = "all";
+let streakDays = [];
+let dragId = null;
 
 showTodaysDate();
 showRandomQuote();
@@ -61,6 +64,7 @@ loadTheme();
 loadTasks();
 loadTrash();
 loadStreak();
+loadBackground();
 render();
 
 function showRandomQuote() {
@@ -99,6 +103,34 @@ themeButtons.forEach((btn) => {
     });
 });
 
+function applyBackground(name) {
+    if (name === "default") {
+        document.body.removeAttribute("data-bg");
+    } else {
+        document.body.setAttribute("data-bg", name);
+    }
+    bgSelect.value = name;
+}
+
+function loadBackground() {
+    let name = "default";
+    try {
+        name = localStorage.getItem(BG_KEY) || "default";
+    } catch (err) {
+        console.error("Could not load background:", err);
+    }
+    applyBackground(name);
+}
+
+bgSelect.addEventListener("change", () => {
+    applyBackground(bgSelect.value);
+    try {
+        localStorage.setItem(BG_KEY, bgSelect.value);
+    } catch (err) {
+        console.error("Could not save background:", err);
+    }
+});
+
 function saveTasks() {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
@@ -115,7 +147,6 @@ function loadTasks() {
         console.error("Could not load saved tasks:", err);
         tasks = [];
     }
-    
 }
 
 function saveTrash() {
@@ -167,7 +198,7 @@ function renderTrash() {
     trashToggleBtn.textContent = (trashOpen ? "Hide trash" : "Trash") + " (" + trash.length + ")";
     trashPanel.hidden = !trashOpen;
 
-        trashList.innerHTML = "";
+    trashList.innerHTML = "";
 
     if (trash.length === 0) {
         const empty = document.createElement("li");
@@ -177,7 +208,6 @@ function renderTrash() {
     }
 
     trash.forEach((task, index) => {
-
         const li = document.createElement("li");
         li.className = "trash-item";
 
@@ -341,7 +371,7 @@ function deleteTask(id, li) {
     if (!ok) return;
 
     li.classList.add("removing");
-        setTimeout(() => {
+    setTimeout(() => {
         moveToTrash([task]);
         tasks = tasks.filter((t) => t.id !== id);
         saveTasks();
@@ -366,7 +396,6 @@ toggleAllBtn.addEventListener("click", () => {
     render();
 });
 
-
 function startEditing(li, task) {
     if (li.querySelector(".task-edit-input")) return;
 
@@ -386,18 +415,18 @@ function startEditing(li, task) {
     editInput.focus();
     editInput.select();
 
-let finished = false;
+    let finished = false;
 
-function finishEditing(save) {
-    if (finished) return;
-    finished = true;
-    const newText = editInput.value.trim();
-    if (save && newText !== "") {
-        task.text = newText;
-        saveTasks();
+    function finishEditing(save) {
+        if (finished) return;
+        finished = true;
+        const newText = editInput.value.trim();
+        if (save && newText !== "") {
+            task.text = newText;
+            saveTasks();
+        }
+        render();
     }
-    render();
-}
 
     editInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") finishEditing(true);
@@ -423,17 +452,21 @@ function sortTasks(list) {
     const copy = [...list];
     const order = { high: 0, medium: 1, low: 2 };
     if (sortBy === "priority") {
-    copy.sort((a, b) => order[a.priority] - order[b.priority]);
+        copy.sort((a, b) => order[a.priority] - order[b.priority]);
     }
     if (sortBy === "due") {
-    copy.sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
+        copy.sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
     }
     return copy;
 }
 
 sortInput.addEventListener("change", () => {
-    if (activeCategory !== "all") list = list.filter((t) => t.category === activeCategory);
     sortBy = sortInput.value;
+    render();
+});
+
+categoryFilter.addEventListener("change", () => {
+    activeCategory = categoryFilter.value;
     render();
 });
 
@@ -442,6 +475,7 @@ function getVisibleTasks() {
     if (activeFilter === "active") list = list.filter((t) => !t.completed);
     if (activeFilter === "completed") list = list.filter((t) => t.completed);
     if (searchQuery) list = list.filter((t) => t.text.toLowerCase().includes(searchQuery));
+    if (activeCategory !== "all") list = list.filter((t) => t.category === activeCategory);
     return sortTasks(list);
 }
 
@@ -452,12 +486,7 @@ searchInput.addEventListener("input", () => {
 
 function isOverdue(task) {
     if (!task.dueDate || task.completed) return false;
-    const now = new Date();
-    const todayStr =
-        now.getFullYear() + "-" +
-        String(now.getMonth() + 1).padStart(2, "0") + "-" +
-        String(now.getDate()).padStart(2, "0");
-    return task.dueDate < todayStr;
+    return task.dueDate < getDateStr(new Date());
 }
 
 function formatDueDate(isoDate) {
@@ -477,18 +506,16 @@ function render() {
             ? "No tasks yet — add one above to get started."
             : "Nothing to show in this view.";
 
-        clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
-        toggleAllBtn.hidden = tasks.length === 0;
-        toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
-       
-        allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
-    
+    clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
+    toggleAllBtn.hidden = tasks.length === 0;
+    toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
+
+    allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
+
     renderStreak();
     renderTrash();
     updateProgress();
 }
-
-let dragId = null;
 
 function setupDrag(li, task) {
     li.draggable = true;
@@ -555,22 +582,19 @@ function buildTaskItem(task) {
     priorityBadge.className = "priority-badge " + task.priority;
     priorityBadge.textContent = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
 
-    const categoryBadge = document.createElement("span");
-    categoryBadge.className = "category-badge";
-    categoryBadge.textContent = task.category;
-
     const topRow = document.createElement("div");
     topRow.className = "task-top";
     topRow.appendChild(span);
     topRow.appendChild(priorityBadge);
-    topRow.appendChild(categoryBadge);
+
+    if (task.category) {
+        const categoryBadge = document.createElement("span");
+        categoryBadge.className = "category-badge";
+        categoryBadge.textContent = task.category;
+        topRow.appendChild(categoryBadge);
+    }
 
     body.appendChild(topRow);
-
-    categoryFilter.addEventListener("change", () => {
-    activeCategory = categoryFilter.value;
-    render();
-});
 
     if (task.dueDate) {
         const due = document.createElement("span");
@@ -604,7 +628,7 @@ function buildTaskItem(task) {
     if (sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all") {
         setupDrag(li, task);
     }
-    
+
     return li;
 }
 
@@ -617,36 +641,3 @@ function updateProgress() {
     progressPercent.textContent = percent + "%";
     progressFill.style.width = percent + "%";
 }
-
-const BG_KEY = "taskflow.background";
-const bgSelect = document.getElementById("bgSelect");
-
-function applyBackground(name) {
-    if (name === "default") {
-        document.body.removeAttribute("data-bg");
-    } else {
-        document.body.setAttribute("data-bg", name);
-    }
-    bgSelect.value = name;
-}
-
-function loadBackground() {
-    let name = "default";
-    try {
-        name = localStorage.getItem(BG_KEY) || "default";
-    } catch (err) {
-        console.error("Could not load background:", err);
-    }
-    applyBackground(name);
-}
-
-bgSelect.addEventListener("change", () => {
-    applyBackground(bgSelect.value);
-    try {
-        localStorage.setItem(BG_KEY, bgSelect.value);
-    } catch (err) {
-        console.error("Could not save background:", err);
-    }
-});
-
-loadBackground();
