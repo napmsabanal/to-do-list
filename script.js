@@ -10,6 +10,7 @@ const clearCompletedBtn = document.getElementById("clearCompletedBtn");
 const progressLabel = document.getElementById("progressLabel");
 const progressPercent = document.getElementById("progressPercent");
 const progressFill = document.getElementById("progressFill");
+const allDoneMsg = document.getElementById("allDoneMsg");
 const todayDateEl = document.getElementById("todayDate");
 
 const STORAGE_KEY = "taskflow.tasks";
@@ -243,6 +244,8 @@ function render() {
             : "Nothing to show in this view.";
 
     clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
+
+        allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
 
     updateProgress();
 }

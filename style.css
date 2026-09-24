@@ -314,6 +314,21 @@ select:focus-visible {
     display: none;
 }
 
+.all-done {
+    text-align: center;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.all-done[hidden] {
+    display: none;
+}
+
 .task-list {
     list-style: none;
     margin-top: 10px;
