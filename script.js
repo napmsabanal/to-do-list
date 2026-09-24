@@ -3,6 +3,7 @@ const taskInput = document.getElementById("taskInput");
 const priorityInput = document.getElementById("priorityInput");
 const dueDateInput = document.getElementById("dueDateInput");
 const formError = document.getElementById("formError");
+const charCount = document.getElementById("charCount");
 const taskList = document.getElementById("taskList");
 const emptyState = document.getElementById("emptyState");
 const filterButtons = document.querySelectorAll(".filter-btn");
@@ -119,14 +120,20 @@ function showFormError(message) {
     taskInput.classList.add("invalid");
 }
 
+function updateCharCount() {
+    const length = taskInput.value.length;
+    charCount.textContent = length + " / 120";
+    charCount.classList.toggle("near-limit", length >= 100);
+}
+
 function isDuplicateTask(text) {
     const normalized = text.trim().toLowerCase();
     return tasks.some((t) => t.text.trim().toLowerCase() === normalized);
 }
 
-taskForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    addTask();
+taskInput.addEventListener("input", () => {
+    showFormError(null);
+    updateCharCount();
 });
 
 function addTask() {
@@ -154,6 +161,7 @@ function addTask() {
 
     showFormError(null);
     taskInput.value = "";
+    updateCharCount();
     dueDateInput.value = "";
     taskInput.focus();
 
@@ -303,7 +311,7 @@ function render() {
     clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
         toggleAllBtn.hidden = tasks.length === 0;
         toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
-        
+
         allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
 
     updateProgress();
