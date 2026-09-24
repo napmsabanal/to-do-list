@@ -163,6 +163,18 @@ select:focus-visible {
     border-color: var(--accent);
 }
 
+.task-item.draggable {
+    cursor: grab;
+}
+
+.task-item.dragging {
+    opacity: 0.4;
+}
+
+.task-item.drag-over {
+    box-shadow: 0 -3px 0 var(--accent);
+}
+
 @media (max-width: 560px) {
     .app-header h1 { font-size: 30px; }
 }

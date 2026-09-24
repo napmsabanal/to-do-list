@@ -313,6 +313,8 @@ toggleAllBtn.addEventListener("click", () => {
 function startEditing(li, task) {
     if (li.querySelector(".task-edit-input")) return;
 
+    li.draggable = false;
+    
     const body = li.querySelector(".task-body");
     const span = body.querySelector(".task-text");
     const topRow = body.querySelector(".task-top");
@@ -427,6 +429,50 @@ function render() {
     updateProgress();
 }
 
+let dragId = null;
+
+function setupDrag(li, task) {
+    li.draggable = true;
+    li.classList.add("draggable");
+
+    li.addEventListener("dragstart", (event) => {
+        dragId = task.id;
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", String(task.id));
+        setTimeout(() => li.classList.add("dragging"), 0);
+    });
+
+    li.addEventListener("dragend", () => {
+        li.classList.remove("dragging");
+        dragId = null;
+        document.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    });
+
+    li.addEventListener("dragover", (event) => {
+        if (dragId === null) return;
+        event.preventDefault();
+        li.classList.add("drag-over");
+    });
+
+    li.addEventListener("dragleave", () => li.classList.remove("drag-over"));
+
+    li.addEventListener("drop", (event) => {
+        event.preventDefault();
+        li.classList.remove("drag-over");
+        if (dragId === null || dragId === task.id) return;
+
+        const from = tasks.findIndex((t) => t.id === dragId);
+        const to = tasks.findIndex((t) => t.id === task.id);
+        dragId = null;
+        if (from === -1 || to === -1) return;
+
+        const [moved] = tasks.splice(from, 1);
+        tasks.splice(to, 0, moved);
+        saveTasks();
+        render();
+    });
+}
+
 function buildTaskItem(task) {
     const li = document.createElement("li");
     li.className = "task-item priority-" + task.priority + (task.completed ? " completed" : "");
@@ -485,6 +531,10 @@ function buildTaskItem(task) {
     li.appendChild(checkbox);
     li.appendChild(body);
     li.appendChild(actions);
+
+    if (sortBy === "added" && activeFilter === "all" && !searchQuery) {
+    setupDrag(li, task);
+    }
 
     return li;
 }
