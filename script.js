@@ -17,9 +17,15 @@ const progressFill = document.getElementById("progressFill");
 const allDoneMsg = document.getElementById("allDoneMsg");
 const todayDateEl = document.getElementById("todayDate");
 const quoteEl = document.getElementById("quote");
+const trashToggleBtn = document.getElementById("trashToggleBtn");
+const trashPanel = document.getElementById("trashPanel");
+const trashList = document.getElementById("trashList");
+const restoreAllBtn = document.getElementById("restoreAllBtn");
+const emptyTrashBtn = document.getElementById("emptyTrashBtn");
 
 const STORAGE_KEY = "taskflow.tasks";
 const THEME_KEY = "taskflow.theme";
+const TRASH_KEY = "taskflow.trash";
 const themeButtons = document.querySelectorAll(".theme-btn");
 const QUOTES = [
     "Start where you are. Use what you have. Do what you can.",
@@ -39,11 +45,14 @@ let nextId = 1;
 let activeFilter = "all";
 let searchQuery = "";
 let sortBy = "added";
+let trash = [];
+let trashOpen = false;
 
 showTodaysDate();
 showRandomQuote();
 loadTheme();
 loadTasks();
+loadTrash();
 render();
 
 function showRandomQuote() {
@@ -98,7 +107,89 @@ function loadTasks() {
         console.error("Could not load saved tasks:", err);
         tasks = [];
     }
+
+    
 }
+
+function saveTrash() {
+    try {
+        localStorage.setItem(TRASH_KEY, JSON.stringify(trash));
+    } catch (err) {
+        console.error("Could not save trash:", err);
+    }
+}
+
+function loadTrash() {
+    try {
+        trash = JSON.parse(localStorage.getItem(TRASH_KEY)) || [];
+    } catch (err) {
+        console.error("Could not load trash:", err);
+        trash = [];
+    }
+}
+
+function moveToTrash(list) {
+    trash.push(...list);
+    saveTrash();
+}
+
+function restoreTask(index) {
+    const [task] = trash.splice(index, 1);
+    tasks.push({ ...task, id: nextId++ });
+    saveTasks();
+    saveTrash();
+    render();
+}
+
+function restoreAll() {
+    trash.forEach((task) => tasks.push({ ...task, id: nextId++ }));
+    trash = [];
+    saveTasks();
+    saveTrash();
+    render();
+}
+
+function emptyTrash() {
+    if (!confirm("Permanently delete " + trash.length + " task(s)? This cannot be undone.")) return;
+    trash = [];
+    saveTrash();
+    render();
+}
+
+function renderTrash() {
+    if (trash.length === 0) trashOpen = false;
+
+    trashToggleBtn.hidden = trash.length === 0;
+    trashToggleBtn.textContent = (trashOpen ? "Hide trash" : "Trash") + " (" + trash.length + ")";
+    trashPanel.hidden = !trashOpen;
+
+    trashList.innerHTML = "";
+    trash.forEach((task, index) => {
+        const li = document.createElement("li");
+        li.className = "trash-item";
+
+        const text = document.createElement("span");
+        text.className = "trash-text";
+        text.textContent = task.text;
+
+        const restoreBtn = document.createElement("button");
+        restoreBtn.className = "icon-btn";
+        restoreBtn.textContent = "Restore";
+        restoreBtn.addEventListener("click", () => restoreTask(index));
+
+        li.appendChild(text);
+        li.appendChild(restoreBtn);
+        trashList.appendChild(li);
+    });
+}
+
+trashToggleBtn.addEventListener("click", () => {
+    trashOpen = !trashOpen;
+    renderTrash();
+});
+
+restoreAllBtn.addEventListener("click", restoreAll);
+emptyTrashBtn.addEventListener("click", emptyTrash);
 
 function showTodaysDate() {
     const today = new Date();
@@ -189,7 +280,8 @@ function deleteTask(id, li) {
     if (!ok) return;
 
     li.classList.add("removing");
-    setTimeout(() => {
+        setTimeout(() => {
+        moveToTrash([task]);
         tasks = tasks.filter((t) => t.id !== id);
         saveTasks();
         render();
@@ -197,8 +289,9 @@ function deleteTask(id, li) {
 }
 
 clearCompletedBtn.addEventListener("click", () => {
-    const count = tasks.filter((t) => t.completed).length;
-    if (!confirm("Clear " + count + " completed task(s)?")) return;
+    const done = tasks.filter((t) => t.completed);
+    if (!confirm("Move " + done.length + " completed task(s) to Trash?")) return;
+    moveToTrash(done);
     tasks = tasks.filter((t) => !t.completed);
     saveTasks();
     render();
@@ -317,6 +410,7 @@ function render() {
 
         allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
 
+    renderTrash();
     updateProgress();
 }
 

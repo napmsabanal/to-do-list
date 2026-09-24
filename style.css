@@ -536,6 +536,51 @@ select:focus-visible {
     max-width: 420px;
 }
 
+.trash-panel {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+}
+
+.trash-panel[hidden] {
+    display: none;
+}
+
+.trash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.trash-header h2 {
+    font-size: 14px;
+    color: var(--slate);
+}
+
+.trash-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.trash-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+}
+
+.trash-text {
+    font-size: 13px;
+    color: var(--slate-light);
+    word-break: break-word;
+}
+
 @media (max-width: 560px) {
     .app-header {
         flex-direction: column;

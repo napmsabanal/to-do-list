@@ -81,9 +81,10 @@
                     <button class="filter-btn" data-filter="completed" role="tab" aria-selected="false">Completed</button>
                 </div>
 
-                 <div class="row-actions">
+                <div class="row-actions">
                     <button id="toggleAllBtn" class="clear-completed-btn" hidden>Mark all complete</button>
                     <button id="clearCompletedBtn" class="clear-completed-btn" hidden>Clear completed</button>
+                    <button id="trashToggleBtn" class="clear-completed-btn" hidden>Trash (0)</button>
                 </div>
             </div>
 
@@ -99,7 +100,17 @@
             <ul id="taskList" class="task-list" aria-live="polite"></ul>
 
             <p id="emptyState" class="empty-state">No tasks yet — add one above to get started.</p>
-
+            
+            <section id="trashPanel" class="trash-panel" hidden>
+                <div class="trash-header">
+                    <h2>Deleted tasks</h2>
+                    <div class="row-actions">
+                        <button id="restoreAllBtn" class="clear-completed-btn">Restore all</button>
+                        <button id="emptyTrashBtn" class="clear-completed-btn">Empty trash</button>
+                    </div>
+                </div>
+                <ul id="trashList" class="trash-list"></ul>
+            </section>
         </main>
 
         <footer class="app-footer">
