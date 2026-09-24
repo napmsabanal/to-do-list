@@ -44,7 +44,7 @@ let tasks = [];
 let nextId = 1;
 let activeFilter = "all";
 let searchQuery = "";
-let sortBy = "added";
+let sortBy = "priority";
 let trash = [];
 let trashOpen = false;
 
@@ -314,7 +314,7 @@ function startEditing(li, task) {
     if (li.querySelector(".task-edit-input")) return;
 
     li.draggable = false;
-    
+
     const body = li.querySelector(".task-body");
     const span = body.querySelector(".task-text");
     const topRow = body.querySelector(".task-top");
