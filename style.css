@@ -439,6 +439,31 @@ select:focus-visible {
     margin-top: 20px;
 }
 
+.task-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.priority-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+
+.priority-badge.low { color: var(--low); background: var(--accent-soft); }
+.priority-badge.medium { color: var(--medium); background: var(--accent-soft); }
+.priority-badge.high { color: var(--high); background: var(--danger-bg); }
+
+.task-edit-input {
+    background: var(--panel);
+    color: var(--navy);
+}
+
 @media (max-width: 560px) {
     .app-header {
         flex-direction: column;

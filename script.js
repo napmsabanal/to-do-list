@@ -128,7 +128,6 @@ function addTask() {
     showFormError(null);
     taskInput.value = "";
     dueDateInput.value = "";
-    priorityInput.value = "medium";
     taskInput.focus();
 
     saveTasks();
@@ -164,6 +163,7 @@ function startEditing(li, task) {
 
     const body = li.querySelector(".task-body");
     const span = body.querySelector(".task-text");
+    const topRow = body.querySelector(".task-top");
 
     const editInput = document.createElement("input");
     editInput.type = "text";
@@ -171,7 +171,7 @@ function startEditing(li, task) {
     editInput.value = task.text;
     editInput.maxLength = 120;
 
-    body.replaceChild(editInput, span);
+    topRow.replaceChild(editInput, span);
     editInput.focus();
     editInput.select();
 
@@ -257,7 +257,16 @@ function buildTaskItem(task) {
     span.textContent = task.text;
     span.addEventListener("dblclick", () => startEditing(li, task));
 
-    body.appendChild(span);
+        const badge = document.createElement("span");
+    badge.className = "priority-badge " + task.priority;
+    badge.textContent = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
+
+    const topRow = document.createElement("div");
+    topRow.className = "task-top";
+    topRow.appendChild(span);
+    topRow.appendChild(badge);
+
+    body.appendChild(topRow);
 
     if (task.dueDate) {
         const due = document.createElement("span");
