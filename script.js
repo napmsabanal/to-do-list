@@ -364,10 +364,10 @@ function sortTasks(list) {
     const copy = [...list];
     const order = { high: 0, medium: 1, low: 2 };
     if (sortBy === "priority") {
-        copy.sort((a, b) => order[a.priority] - order[b.priority]);
+    copy.sort((a, b) => order[a.priority] - order[b.priority]);
     }
     if (sortBy === "due") {
-        copy.sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
+    copy.sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
     }
     return copy;
 }
