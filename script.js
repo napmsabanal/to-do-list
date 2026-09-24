@@ -8,6 +8,7 @@ const emptyState = document.getElementById("emptyState");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const clearCompletedBtn = document.getElementById("clearCompletedBtn");
 const searchInput = document.getElementById("searchInput");
+const sortInput = document.getElementById("sortInput");
 const progressLabel = document.getElementById("progressLabel");
 const progressPercent = document.getElementById("progressPercent");
 const progressFill = document.getElementById("progressFill");
@@ -35,6 +36,7 @@ let tasks = [];
 let nextId = 1;
 let activeFilter = "all";
 let searchQuery = "";
+let sortBy = "added";
 
 showTodaysDate();
 showTodaysDate();
@@ -237,12 +239,29 @@ filterButtons.forEach((btn) => {
     });
 });
 
+function sortTasks(list) {
+    const copy = [...list];
+    const order = { high: 0, medium: 1, low: 2 };
+    if (sortBy === "priority") {
+        copy.sort((a, b) => order[a.priority] - order[b.priority]);
+    }
+    if (sortBy === "due") {
+        copy.sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
+    }
+    return copy;
+}
+
+sortInput.addEventListener("change", () => {
+    sortBy = sortInput.value;
+    render();
+});
+
 function getVisibleTasks() {
     let list = tasks;
     if (activeFilter === "active") list = list.filter((t) => !t.completed);
     if (activeFilter === "completed") list = list.filter((t) => t.completed);
     if (searchQuery) list = list.filter((t) => t.text.toLowerCase().includes(searchQuery));
-    return list;
+    return sortTasks(list);
 }
 
 searchInput.addEventListener("input", () => {

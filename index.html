@@ -84,6 +84,11 @@
 
             <div class="tools-row">
                 <input type="search" id="searchInput" class="search-input" placeholder="Search tasks..." aria-label="Search tasks">
+                        <select id="sortInput" class="sort-select" aria-label="Sort tasks">
+                            <option value="added">Order added</option>
+                            <option value="priority">Priority</option>
+                            <option value="due">Due date</option>
+                        </select>
             </div>
 
             <ul id="taskList" class="task-list" aria-live="polite"></ul>

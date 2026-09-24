@@ -500,6 +500,15 @@ select:focus-visible {
     border-color: var(--accent);
 }
 
+.sort-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    color: var(--slate);
+    background: var(--panel);
+}
+
 @media (max-width: 560px) {
     .app-header {
         flex-direction: column;
