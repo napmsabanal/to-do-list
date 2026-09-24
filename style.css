@@ -581,6 +581,56 @@ select:focus-visible {
     word-break: break-word;
 }
 
+.bg-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 8px;
+    font-size: 12px;
+    color: var(--slate);
+    background: var(--panel);
+}
+
+body[data-bg] {
+    background-attachment: fixed;
+}
+
+body[data-bg="sunset"] {
+    background-image: linear-gradient(135deg, #fed7aa, #fda4af);
+}
+
+body[data-bg="ocean"] {
+    background-image: linear-gradient(135deg, #bae6fd, #93c5fd);
+}
+
+body[data-bg="forest"] {
+    background-image: linear-gradient(135deg, #bbf7d0, #86efac);
+}
+
+body[data-bg="lavender"] {
+    background-image: linear-gradient(135deg, #ddd6fe, #f5d0fe);
+}
+
+body[data-bg="dots"] {
+    background-image: radial-gradient(#94a3b8 1.3px, transparent 1.3px);
+    background-size: 22px 22px;
+}
+
+:root[data-theme="dark"] body[data-bg="sunset"] {
+    background-image: linear-gradient(135deg, #7c2d12, #831843);
+}
+
+:root[data-theme="dark"] body[data-bg="ocean"] {
+    background-image: linear-gradient(135deg, #0c4a6e, #1e3a8a);
+}
+
+:root[data-theme="dark"] body[data-bg="forest"] {
+    background-image: linear-gradient(135deg, #14532d, #166534);
+}
+
+:root[data-theme="dark"] body[data-bg="lavender"] {
+    background-image: linear-gradient(135deg, #4c1d95, #701a75);
+}
+
 @media (max-width: 560px) {
     .app-header {
         flex-direction: column;

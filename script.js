@@ -107,7 +107,6 @@ function loadTasks() {
         console.error("Could not load saved tasks:", err);
         tasks = [];
     }
-
     
 }
 
@@ -491,3 +490,36 @@ function updateProgress() {
     progressPercent.textContent = percent + "%";
     progressFill.style.width = percent + "%";
 }
+
+const BG_KEY = "taskflow.background";
+const bgSelect = document.getElementById("bgSelect");
+
+function applyBackground(name) {
+    if (name === "default") {
+        document.body.removeAttribute("data-bg");
+    } else {
+        document.body.setAttribute("data-bg", name);
+    }
+    bgSelect.value = name;
+}
+
+function loadBackground() {
+    let name = "default";
+    try {
+        name = localStorage.getItem(BG_KEY) || "default";
+    } catch (err) {
+        console.error("Could not load background:", err);
+    }
+    applyBackground(name);
+}
+
+bgSelect.addEventListener("change", () => {
+    applyBackground(bgSelect.value);
+    try {
+        localStorage.setItem(BG_KEY, bgSelect.value);
+    } catch (err) {
+        console.error("Could not save background:", err);
+    }
+});
+
+loadBackground();
