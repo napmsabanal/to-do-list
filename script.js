@@ -327,14 +327,18 @@ function startEditing(li, task) {
     editInput.focus();
     editInput.select();
 
-    function finishEditing(save) {
-        const newText = editInput.value.trim();
-        if (save && newText !== "") {
-            task.text = newText;
-            saveTasks();
-        }
-        render();
+let finished = false;
+
+function finishEditing(save) {
+    if (finished) return;
+    finished = true;
+    const newText = editInput.value.trim();
+    if (save && newText !== "") {
+        task.text = newText;
+        saveTasks();
     }
+    render();
+}
 
     editInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") finishEditing(true);
@@ -388,7 +392,11 @@ searchInput.addEventListener("input", () => {
 
 function isOverdue(task) {
     if (!task.dueDate || task.completed) return false;
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const todayStr =
+        now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
     return task.dueDate < todayStr;
 }
 

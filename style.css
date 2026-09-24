@@ -645,6 +645,11 @@ body[data-bg="dots"] {
         flex-direction: column;
     }
 
+    .task-input {
+        flex: none;
+        width: 100%;
+    }
+
     #priorityInput,
     #dueDateInput,
     #addTaskBtn {
