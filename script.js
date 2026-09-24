@@ -1,0 +1,302 @@
+const taskForm = document.getElementById("taskForm");
+const taskInput = document.getElementById("taskInput");
+const priorityInput = document.getElementById("priorityInput");
+const dueDateInput = document.getElementById("dueDateInput");
+const formError = document.getElementById("formError");
+const taskList = document.getElementById("taskList");
+const emptyState = document.getElementById("emptyState");
+const filterButtons = document.querySelectorAll(".filter-btn");
+const clearCompletedBtn = document.getElementById("clearCompletedBtn");
+const progressLabel = document.getElementById("progressLabel");
+const progressPercent = document.getElementById("progressPercent");
+const progressFill = document.getElementById("progressFill");
+const todayDateEl = document.getElementById("todayDate");
+
+const STORAGE_KEY = "taskflow.tasks";
+const THEME_KEY = "taskflow.theme";
+const themeButtons = document.querySelectorAll(".theme-btn");
+
+let tasks = [];
+let nextId = 1;
+let activeFilter = "all";
+
+showTodaysDate();
+loadTheme();
+loadTasks();
+render();
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    themeButtons.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.theme === theme);
+    });
+}
+
+function loadTheme() {
+    let theme = "light";
+    try {
+        theme = localStorage.getItem(THEME_KEY) || "light";
+    } catch (err) {
+        console.error("Could not load saved theme:", err);
+    }
+    applyTheme(theme);
+}
+
+themeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const theme = btn.dataset.theme;
+        applyTheme(theme);
+        try {
+            localStorage.setItem(THEME_KEY, theme);
+        } catch (err) {
+            console.error("Could not save theme:", err);
+        }
+    });
+});
+
+function saveTasks() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    } catch (err) {
+        console.error("Could not save tasks:", err);
+    }
+}
+
+function loadTasks() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        tasks = saved.map((t) => ({ ...t, id: nextId++ }));
+    } catch (err) {
+        console.error("Could not load saved tasks:", err);
+        tasks = [];
+    }
+}
+
+function showTodaysDate() {
+    const today = new Date();
+    todayDateEl.textContent = today.toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+    });
+}
+
+function showFormError(message) {
+    if (!message) {
+        formError.hidden = true;
+        taskInput.classList.remove("invalid");
+        return;
+    }
+    formError.textContent = message;
+    formError.hidden = false;
+    taskInput.classList.add("invalid");
+}
+
+function isDuplicateTask(text) {
+    const normalized = text.trim().toLowerCase();
+    return tasks.some((t) => t.text.trim().toLowerCase() === normalized);
+}
+
+taskForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addTask();
+});
+
+function addTask() {
+    const text = taskInput.value.trim();
+
+    if (text === "") {
+        showFormError("Please describe the task before adding it.");
+        taskInput.focus();
+        return;
+    }
+
+    if (isDuplicateTask(text)) {
+        showFormError("That task is already on your list.");
+        taskInput.focus();
+        return;
+    }
+
+    tasks.push({
+        id: nextId++,
+        text,
+        completed: false,
+        priority: priorityInput.value,
+        dueDate: dueDateInput.value || null,
+    });
+
+    showFormError(null);
+    taskInput.value = "";
+    dueDateInput.value = "";
+    priorityInput.value = "medium";
+    taskInput.focus();
+
+    saveTasks();
+    render();
+}
+
+taskInput.addEventListener("input", () => showFormError(null));
+
+function toggleTask(id) {
+    const task = tasks.find((t) => t.id === id);
+    if (task) task.completed = !task.completed;
+    saveTasks();
+    render();
+}
+
+function deleteTask(id, li) {
+    li.classList.add("removing");
+    setTimeout(() => {
+        tasks = tasks.filter((t) => t.id !== id);
+        saveTasks();
+        render();
+    }, 180);
+}
+
+clearCompletedBtn.addEventListener("click", () => {
+    tasks = tasks.filter((t) => !t.completed);
+    saveTasks();
+    render();
+});
+
+function startEditing(li, task) {
+    if (li.querySelector(".task-edit-input")) return;
+
+    const body = li.querySelector(".task-body");
+    const span = body.querySelector(".task-text");
+
+    const editInput = document.createElement("input");
+    editInput.type = "text";
+    editInput.className = "task-edit-input";
+    editInput.value = task.text;
+    editInput.maxLength = 120;
+
+    body.replaceChild(editInput, span);
+    editInput.focus();
+    editInput.select();
+
+    function finishEditing(save) {
+        const newText = editInput.value.trim();
+        if (save && newText !== "") {
+            task.text = newText;
+            saveTasks();
+        }
+        render();
+    }
+
+    editInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") finishEditing(true);
+        if (event.key === "Escape") finishEditing(false);
+    });
+
+    editInput.addEventListener("blur", () => finishEditing(true));
+}
+
+filterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        activeFilter = btn.dataset.filter;
+        filterButtons.forEach((b) => {
+            const isActive = b === btn;
+            b.classList.toggle("active", isActive);
+            b.setAttribute("aria-selected", String(isActive));
+        });
+        render();
+    });
+});
+
+function getVisibleTasks() {
+    if (activeFilter === "active") return tasks.filter((t) => !t.completed);
+    if (activeFilter === "completed") return tasks.filter((t) => t.completed);
+    return tasks;
+}
+
+function isOverdue(task) {
+    if (!task.dueDate || task.completed) return false;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    return task.dueDate < todayStr;
+}
+
+function formatDueDate(isoDate) {
+    const [y, m, d] = isoDate.split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function render() {
+    const visibleTasks = getVisibleTasks();
+
+    taskList.innerHTML = "";
+    visibleTasks.forEach((task) => taskList.appendChild(buildTaskItem(task)));
+
+    emptyState.hidden = visibleTasks.length !== 0;
+    emptyState.textContent =
+        tasks.length === 0
+            ? "No tasks yet — add one above to get started."
+            : "Nothing to show in this view.";
+
+    clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
+
+    updateProgress();
+}
+
+function buildTaskItem(task) {
+    const li = document.createElement("li");
+    li.className = "task-item priority-" + task.priority + (task.completed ? " completed" : "");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "task-checkbox";
+    checkbox.checked = task.completed;
+    checkbox.setAttribute("aria-label", "Mark task complete");
+    checkbox.addEventListener("change", () => toggleTask(task.id));
+
+    const body = document.createElement("div");
+    body.className = "task-body";
+
+    const span = document.createElement("span");
+    span.className = "task-text";
+    span.textContent = task.text;
+    span.addEventListener("dblclick", () => startEditing(li, task));
+
+    body.appendChild(span);
+
+    if (task.dueDate) {
+        const due = document.createElement("span");
+        due.className = "task-due" + (isOverdue(task) ? " overdue" : "");
+        due.textContent = (isOverdue(task) ? "Overdue — " : "Due ") + formatDueDate(task.dueDate);
+        body.appendChild(due);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "task-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "icon-btn edit";
+    editBtn.textContent = "Edit";
+    editBtn.setAttribute("aria-label", "Edit task");
+    editBtn.addEventListener("click", () => startEditing(li, task));
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "icon-btn delete";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.setAttribute("aria-label", "Delete task");
+    deleteBtn.addEventListener("click", () => deleteTask(task.id, li));
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
+    li.appendChild(checkbox);
+    li.appendChild(body);
+    li.appendChild(actions);
+
+    return li;
+}
+
+function updateProgress() {
+    const total = tasks.length;
+    const completed = tasks.filter((t) => t.completed).length;
+    const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+    progressLabel.textContent = completed + " of " + total + " tasks completed";
+    progressPercent.textContent = percent + "%";
+    progressFill.style.width = percent + "%";
+}
