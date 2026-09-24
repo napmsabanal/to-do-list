@@ -1,0 +1,461 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root,
+:root[data-theme="light"] {
+    --navy: #1e293b;
+    --slate: #475569;
+    --slate-light: #94a3b8;
+    --border: #e2e8f0;
+    --bg: #f1f5f9;
+    --panel: #ffffff;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --low: #0ea5e9;
+    --medium: #d97706;
+    --high: #dc2626;
+}
+
+:root[data-theme="dark"] {
+    --navy: #f1f5f9;
+    --slate: #cbd5e1;
+    --slate-light: #7c8aa5;
+    --border: #334155;
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --accent: #6366f1;
+    --accent-soft: rgba(99, 102, 241, 0.18);
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.15);
+    --low: #38bdf8;
+    --medium: #fbbf24;
+    --high: #f87171;
+}
+
+:root[data-theme="yellow"] {
+    --navy: #402c00;
+    --slate: #78502b;
+    --slate-light: #a9895e;
+    --border: #fde68a;
+    --bg: #fffbeb;
+    --panel: #ffffff;
+    --accent: #d97706;
+    --accent-soft: #fef3c7;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --low: #0ea5e9;
+    --medium: #ca8a04;
+    --high: #dc2626;
+}
+
+body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    min-height: 100vh;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.app {
+    width: min(760px, 92%);
+    margin: 0 auto;
+    padding: 48px 0 32px;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 16px;
+}
+
+.brand-eyebrow {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.app-header h1 {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+.tagline {
+    font-size: 14px;
+    color: var(--slate-light);
+    margin-top: 8px;
+}
+
+.header-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.brand-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--accent);
+    color: white;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.brand-mark svg {
+    width: 24px;
+    height: 24px;
+}
+
+.today-date {
+    font-size: 12px;
+    color: var(--slate-light);
+}
+
+.theme-switcher {
+    display: flex;
+    gap: 6px;
+}
+
+.theme-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    padding: 0;
+    border: 2px solid transparent;
+    transition: border-color 0.15s ease;
+}
+
+.theme-btn[data-theme="light"] { background: #f1f5f9; box-shadow: inset 0 0 0 1px #cbd5e1; }
+.theme-btn[data-theme="dark"] { background: #0f172a; }
+.theme-btn[data-theme="yellow"] { background: #fbbf24; }
+
+.theme-btn.active {
+    border-color: var(--accent);
+}
+
+@media (max-width: 560px) {
+    .app-header h1 { font-size: 30px; }
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 26px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.progress-section {
+    margin-bottom: 24px;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--slate);
+    margin-bottom: 8px;
+}
+
+#progressPercent {
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.progress-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.25s ease;
+}
+
+.task-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.task-input {
+    flex: 1 1 220px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 14px;
+    outline: none;
+    color: var(--navy);
+    background: var(--panel);
+    transition: border-color 0.15s, background 0.2s ease;
+}
+
+.task-input:focus {
+    border-color: var(--accent);
+}
+
+.task-input.invalid {
+    border-color: var(--danger);
+}
+
+#priorityInput,
+#dueDateInput {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 10px;
+    font-size: 13px;
+    color: var(--slate);
+    background: var(--panel);
+}
+
+#addTaskBtn {
+    background: var(--accent);
+    color: white;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-size: 14px;
+    transition: background 0.15s;
+}
+
+#addTaskBtn:hover {
+    filter: brightness(0.9);
+}
+
+.form-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 6px;
+}
+
+.filter-btn {
+    background: transparent;
+    color: var(--slate-light);
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 999px;
+}
+
+.filter-btn:hover {
+    color: var(--slate);
+}
+
+.filter-btn.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.clear-completed-btn {
+    background: transparent;
+    color: var(--slate-light);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: underline;
+}
+
+.clear-completed-btn:hover {
+    color: var(--danger);
+}
+
+.clear-completed-btn[hidden] {
+    display: none;
+}
+
+.task-list {
+    list-style: none;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--medium);
+    border-radius: 8px;
+    background: var(--panel);
+    transition: opacity 0.18s ease, transform 0.18s ease, background 0.2s ease;
+    animation: fadeIn 0.15s ease;
+}
+
+.task-item.priority-low { border-left-color: var(--low); }
+.task-item.priority-medium { border-left-color: var(--medium); }
+.task-item.priority-high { border-left-color: var(--high); }
+
+.task-item.removing {
+    opacity: 0;
+    transform: translateX(6px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.task-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.task-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.task-text {
+    font-size: 14px;
+    color: var(--navy);
+    word-break: break-word;
+}
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    color: var(--slate-light);
+}
+
+.task-due {
+    font-size: 12px;
+    color: var(--slate-light);
+}
+
+.task-due.overdue {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.task-edit-input {
+    flex: 1;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 6px 8px;
+    outline: none;
+}
+
+.task-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.icon-btn {
+    background: transparent;
+    color: var(--slate-light);
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.icon-btn:hover {
+    background: var(--bg);
+    color: var(--slate);
+}
+
+.icon-btn.delete:hover {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--slate-light);
+    font-size: 13px;
+    padding: 30px 10px;
+}
+
+.empty-state[hidden] {
+    display: none;
+}
+
+.app-footer {
+    text-align: center;
+    color: var(--slate-light);
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+@media (max-width: 560px) {
+    .app-header {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .panel {
+        padding: 18px;
+    }
+
+    .task-form {
+        flex-direction: column;
+    }
+
+    #priorityInput,
+    #dueDateInput,
+    #addTaskBtn {
+        width: 100%;
+    }
+}
