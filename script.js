@@ -7,6 +7,7 @@ const taskList = document.getElementById("taskList");
 const emptyState = document.getElementById("emptyState");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const clearCompletedBtn = document.getElementById("clearCompletedBtn");
+const searchInput = document.getElementById("searchInput");
 const progressLabel = document.getElementById("progressLabel");
 const progressPercent = document.getElementById("progressPercent");
 const progressFill = document.getElementById("progressFill");
@@ -33,6 +34,7 @@ const QUOTES = [
 let tasks = [];
 let nextId = 1;
 let activeFilter = "all";
+let searchQuery = "";
 
 showTodaysDate();
 showTodaysDate();
@@ -236,10 +238,17 @@ filterButtons.forEach((btn) => {
 });
 
 function getVisibleTasks() {
-    if (activeFilter === "active") return tasks.filter((t) => !t.completed);
-    if (activeFilter === "completed") return tasks.filter((t) => t.completed);
-    return tasks;
+    let list = tasks;
+    if (activeFilter === "active") list = list.filter((t) => !t.completed);
+    if (activeFilter === "completed") list = list.filter((t) => t.completed);
+    if (searchQuery) list = list.filter((t) => t.text.toLowerCase().includes(searchQuery));
+    return list;
 }
+
+searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    render();
+});
 
 function isOverdue(task) {
     if (!task.dueDate || task.completed) return false;

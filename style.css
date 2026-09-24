@@ -479,6 +479,26 @@ select:focus-visible {
     color: var(--navy);
 }
 
+.tools-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.search-input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--navy);
+    background: var(--panel);
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: var(--accent);
+}
 
 @media (max-width: 560px) {
     .app-header {
