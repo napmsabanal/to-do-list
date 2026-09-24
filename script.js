@@ -144,6 +144,12 @@ function toggleTask(id) {
 }
 
 function deleteTask(id, li) {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+
+    const ok = confirm('Delete "' + task.text + '"? This cannot be undone.');
+    if (!ok) return;
+
     li.classList.add("removing");
     setTimeout(() => {
         tasks = tasks.filter((t) => t.id !== id);
@@ -153,10 +159,13 @@ function deleteTask(id, li) {
 }
 
 clearCompletedBtn.addEventListener("click", () => {
+    const count = tasks.filter((t) => t.completed).length;
+    if (!confirm("Clear " + count + " completed task(s)?")) return;
     tasks = tasks.filter((t) => !t.completed);
     saveTasks();
     render();
 });
+
 
 function startEditing(li, task) {
     if (li.querySelector(".task-edit-input")) return;
