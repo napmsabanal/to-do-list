@@ -41,7 +41,7 @@ let searchQuery = "";
 let sortBy = "added";
 
 showTodaysDate();
-showTodaysDate();
+showRandomQuote();
 loadTheme();
 loadTasks();
 render();
