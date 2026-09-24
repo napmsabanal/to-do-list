@@ -136,6 +136,11 @@ taskInput.addEventListener("input", () => {
     updateCharCount();
 });
 
+taskForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addTask();
+});
+
 function addTask() {
     const text = taskInput.value.trim();
 
@@ -168,8 +173,6 @@ function addTask() {
     saveTasks();
     render();
 }
-
-taskInput.addEventListener("input", () => showFormError(null));
 
 function toggleTask(id) {
     const task = tasks.find((t) => t.id === id);
