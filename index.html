@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TaskFlow — Personal Task Manager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app">
+
+        <header class="app-header">
+            <div class="brand">
+                <p class="brand-eyebrow">My Productivity</p>
+                <h1>To-Do List</h1>
+                <p class="tagline">Organize your tasks and stay motivated.</p>
+            </div>
+
+            <div class="header-side">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+
+                <div class="theme-switcher" role="group" aria-label="Color theme">
+                    <button type="button" class="theme-btn active" data-theme="light" title="Light theme" aria-label="Light theme"></button>
+                    <button type="button" class="theme-btn" data-theme="dark" title="Black theme" aria-label="Black theme"></button>
+                    <button type="button" class="theme-btn" data-theme="yellow" title="Yellow theme" aria-label="Yellow theme"></button>
+                </div>
+
+                <p id="todayDate" class="today-date"></p>
+            </div>
+        </header>
+
+        <main class="panel">
+
+            <section class="progress-section">
+                <div class="progress-labels">
+                    <span id="progressLabel">0 of 0 tasks completed</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </section>
+
+            <form id="taskForm" class="task-form">
+                <input
+                    type="text"
+                    id="taskInput"
+                    class="task-input"
+                    placeholder="What do you need to do?"
+                    autocomplete="off"
+                    maxlength="120"
+                    aria-label="Task description"
+                >
+
+                <select id="priorityInput" aria-label="Priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+
+                <input type="date" id="dueDateInput" aria-label="Due date (optional)">
+
+                <button type="submit" id="addTaskBtn">Add Task</button>
+            </form>
+
+            <p id="formError" class="form-error" hidden></p>
+
+            <div class="filter-row" role="tablist">
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all" role="tab" aria-selected="true">All</button>
+                    <button class="filter-btn" data-filter="active" role="tab" aria-selected="false">Active</button>
+                    <button class="filter-btn" data-filter="completed" role="tab" aria-selected="false">Completed</button>
+                </div>
+                <button id="clearCompletedBtn" class="clear-completed-btn" hidden>Clear completed</button>
+            </div>
+
+            <ul id="taskList" class="task-list" aria-live="polite"></ul>
+
+            <p id="emptyState" class="empty-state">No tasks yet — add one above to get started.</p>
+
+        </main>
+
+        <footer class="app-footer">
+            <p>Marinelle's Week-4 &middot; Interactive To-Do List Project</p>
+        </footer>
+
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
