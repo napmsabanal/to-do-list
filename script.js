@@ -157,7 +157,6 @@ function emptyTrash() {
 }
 
 function renderTrash() {
-    trashToggleBtn.hidden = trash.length === 0;
     trashToggleBtn.textContent = (trashOpen ? "Hide trash" : "Trash") + " (" + trash.length + ")";
     trashPanel.hidden = !trashOpen;
 
@@ -411,9 +410,10 @@ function render() {
             ? "No tasks yet — add one above to get started."
             : "Nothing to show in this view.";
 
-    clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
+        clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
+        toggleAllBtn.hidden = tasks.length === 0;
         toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
-
+       
         allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
 
     renderTrash();
