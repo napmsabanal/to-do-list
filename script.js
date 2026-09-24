@@ -12,19 +12,40 @@ const progressPercent = document.getElementById("progressPercent");
 const progressFill = document.getElementById("progressFill");
 const allDoneMsg = document.getElementById("allDoneMsg");
 const todayDateEl = document.getElementById("todayDate");
+const quoteEl = document.getElementById("quote");
 
 const STORAGE_KEY = "taskflow.tasks";
 const THEME_KEY = "taskflow.theme";
 const themeButtons = document.querySelectorAll(".theme-btn");
+const QUOTES = [
+    "Start where you are. Use what you have. Do what you can.",
+    "Small steps every day add up to big results.",
+    "Done is better than perfect.",
+    "Focus on progress, not perfection.",
+    "The secret of getting ahead is getting started.",
+    "One task at a time. You've got this.",
+    "Discipline is choosing what you want most over what you want now.",
+    "Don't wait for motivation. Start, and motivation will follow.",
+    "Every finished task is a win. Celebrate it.",
+    "Your future self will thank you for what you do today."
+];
 
 let tasks = [];
 let nextId = 1;
 let activeFilter = "all";
 
 showTodaysDate();
+showTodaysDate();
 loadTheme();
 loadTasks();
 render();
+
+function showRandomQuote() {
+    const index = Math.floor(Math.random() * QUOTES.length);
+    quoteEl.textContent = "“" + QUOTES[index] + "”";
+}
+
+quoteEl.addEventListener("click", showRandomQuote);
 
 function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);

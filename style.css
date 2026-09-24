@@ -479,6 +479,7 @@ select:focus-visible {
     color: var(--navy);
 }
 
+
 @media (max-width: 560px) {
     .app-header {
         flex-direction: column;
