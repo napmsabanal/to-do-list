@@ -509,6 +509,12 @@ select:focus-visible {
     background: var(--panel);
 }
 
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
 @media (max-width: 560px) {
     .app-header {
         flex-direction: column;

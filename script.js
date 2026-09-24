@@ -7,6 +7,7 @@ const taskList = document.getElementById("taskList");
 const emptyState = document.getElementById("emptyState");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const clearCompletedBtn = document.getElementById("clearCompletedBtn");
+const toggleAllBtn = document.getElementById("toggleAllBtn");
 const searchInput = document.getElementById("searchInput");
 const sortInput = document.getElementById("sortInput");
 const progressLabel = document.getElementById("progressLabel");
@@ -192,6 +193,13 @@ clearCompletedBtn.addEventListener("click", () => {
     render();
 });
 
+toggleAllBtn.addEventListener("click", () => {
+    const allDone = tasks.every((t) => t.completed);
+    tasks.forEach((t) => (t.completed = !allDone));
+    saveTasks();
+    render();
+});
+
 
 function startEditing(li, task) {
     if (li.querySelector(".task-edit-input")) return;
@@ -293,7 +301,9 @@ function render() {
             : "Nothing to show in this view.";
 
     clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
-
+        toggleAllBtn.hidden = tasks.length === 0;
+        toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
+        
         allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
 
     updateProgress();
