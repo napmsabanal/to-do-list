@@ -75,6 +75,14 @@
                     <option value="high">High</option>
                 </select>
 
+                 <select id="categoryInput" aria-label="Category">
+                    <option value="">No category</option>
+                    <option value="School">School</option>
+                    <option value="Home">Home</option>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                </select>
+
                 <input type="date" id="dueDateInput" aria-label="Due date (optional)">
 
                 <button type="submit" id="addTaskBtn">Add Task</button>
@@ -103,6 +111,14 @@
                             <option value="added">Order added</option>
                             <option value="priority" selected>Priority</option>
                             <option value="due">Due date</option>
+                        </select>
+
+                        <select id="categoryFilter" class="sort-select" aria-label="Filter by category">
+                            <option value="all">All categories</option>
+                            <option value="School">School</option>
+                            <option value="Home">Home</option>
+                            <option value="Work">Work</option>
+                            <option value="Personal">Personal</option>
                         </select>
             </div>
 

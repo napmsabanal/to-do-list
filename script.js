@@ -22,6 +22,8 @@ const trashPanel = document.getElementById("trashPanel");
 const trashList = document.getElementById("trashList");
 const restoreAllBtn = document.getElementById("restoreAllBtn");
 const emptyTrashBtn = document.getElementById("emptyTrashBtn");
+const categoryInput = document.getElementById("categoryInput");
+const categoryFilter = document.getElementById("categoryFilter");
 
 const STORAGE_KEY = "taskflow.tasks";
 const THEME_KEY = "taskflow.theme";
@@ -47,6 +49,7 @@ let searchQuery = "";
 let sortBy = "priority";
 let trash = [];
 let trashOpen = false;
+let activeCategory = "all";
 
 showTodaysDate();
 showRandomQuote();
@@ -256,6 +259,7 @@ function addTask() {
         id: nextId++,
         text,
         completed: false,
+        category: categoryInput.value,
         priority: priorityInput.value,
         dueDate: dueDateInput.value || null,
     });
@@ -375,6 +379,7 @@ function sortTasks(list) {
 }
 
 sortInput.addEventListener("change", () => {
+    if (activeCategory !== "all") list = list.filter((t) => t.category === activeCategory);
     sortBy = sortInput.value;
     render();
 });
@@ -492,16 +497,26 @@ function buildTaskItem(task) {
     span.textContent = task.text;
     span.addEventListener("dblclick", () => startEditing(li, task));
 
-        const badge = document.createElement("span");
-    badge.className = "priority-badge " + task.priority;
-    badge.textContent = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
+    const priorityBadge = document.createElement("span");
+    priorityBadge.className = "priority-badge " + task.priority;
+    priorityBadge.textContent = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
+
+    const categoryBadge = document.createElement("span");
+    categoryBadge.className = "category-badge";
+    categoryBadge.textContent = task.category;
 
     const topRow = document.createElement("div");
     topRow.className = "task-top";
     topRow.appendChild(span);
-    topRow.appendChild(badge);
+    topRow.appendChild(priorityBadge);
+    topRow.appendChild(categoryBadge);
 
     body.appendChild(topRow);
+
+    categoryFilter.addEventListener("change", () => {
+    activeCategory = categoryFilter.value;
+    render();
+});
 
     if (task.dueDate) {
         const due = document.createElement("span");
@@ -532,10 +547,10 @@ function buildTaskItem(task) {
     li.appendChild(body);
     li.appendChild(actions);
 
-    if (sortBy === "added" && activeFilter === "all" && !searchQuery) {
-    setupDrag(li, task);
+    if (sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all") {
+        setupDrag(li, task);
     }
-
+    
     return li;
 }
 
