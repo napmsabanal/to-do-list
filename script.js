@@ -157,14 +157,21 @@ function emptyTrash() {
 }
 
 function renderTrash() {
-    if (trash.length === 0) trashOpen = false;
-
     trashToggleBtn.hidden = trash.length === 0;
     trashToggleBtn.textContent = (trashOpen ? "Hide trash" : "Trash") + " (" + trash.length + ")";
     trashPanel.hidden = !trashOpen;
 
-    trashList.innerHTML = "";
+        trashList.innerHTML = "";
+
+    if (trash.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "trash-text";
+        empty.textContent = "Trash is empty.";
+        trashList.appendChild(empty);
+    }
+
     trash.forEach((task, index) => {
+
         const li = document.createElement("li");
         li.className = "trash-item";
 
@@ -405,7 +412,6 @@ function render() {
             : "Nothing to show in this view.";
 
     clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
-        toggleAllBtn.hidden = tasks.length === 0;
         toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
 
         allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
