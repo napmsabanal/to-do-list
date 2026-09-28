@@ -702,4 +702,12 @@ body[data-bg="dots"] {
     #addTaskBtn {
         width: 100%;
     }
+
+    .tools-row {
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1 1 100%;
+    }
 }
