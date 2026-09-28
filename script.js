@@ -640,6 +640,16 @@ function formatDueDate(isoDate) {
     return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function getDueText(task) {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    if (task.dueDate === getDateStr(today)) return "Due today";
+    if (task.dueDate === getDateStr(tomorrow)) return "Due tomorrow";
+    return "Due " + formatDueDate(task.dueDate);
+}
+
 function render() {
     const visibleTasks = getVisibleTasks();
 
@@ -744,12 +754,17 @@ function buildTaskItem(task) {
     body.appendChild(topRow);
 
     if (task.dueDate) {
-        const due = document.createElement("span");
-        due.className = "task-due" + (isOverdue(task) ? " overdue" : "");
-        due.textContent = (isOverdue(task) ? "Overdue \u2014 " : "Due ") + formatDueDate(task.dueDate);
-        body.appendChild(due);
-    }
+        const overdue = isOverdue(task);
+        const dueToday = !task.completed && task.dueDate === getDateStr(new Date());
 
+        const due = document.createElement("span");
+        due.className = "task-due" + (overdue ? " overdue" : "") + (dueToday ? " due-today" : "");
+        due.textContent = overdue ? "Overdue \u2014 " + formatDueDate(task.dueDate) : getDueText(task);
+        body.appendChild(due);
+
+        if (dueToday) li.classList.add("due-today");
+    }
+    
     const actions = document.createElement("div");
     actions.className = "task-actions";
 

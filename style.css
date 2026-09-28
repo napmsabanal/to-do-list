@@ -700,6 +700,15 @@ body[data-bg="dots"] {
     font-size: 13px;
 }
 
+.task-due.due-today {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.task-item.due-today {
+    background: var(--accent-soft);
+}
+
 @media (hover: none) {
     .move-btn {
         display: inline-block;
