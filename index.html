@@ -52,7 +52,7 @@
                     <span id="progressLabel">0 of 0 tasks completed</span>
                     <span id="progressPercent">0%</span>
                 </div>
-                <div class="progress-track">
+                <div class="progress-track" role="progressbar" aria-label="Task completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <div id="progressFill" class="progress-fill"></div>
                 </div>
             </section>
@@ -108,19 +108,19 @@
 
             <div class="tools-row">
                 <input type="search" id="searchInput" class="search-input" placeholder="Search tasks..." aria-label="Search tasks">
-                        <select id="sortInput" class="sort-select" aria-label="Sort tasks">
-                            <option value="added">Order added</option>
-                            <option value="priority" selected>Priority</option>
-                            <option value="due">Due date</option>
-                        </select>
+                    <select id="sortInput" class="sort-select" aria-label="Sort tasks">
+                        <option value="added">Order added</option>
+                        <option value="priority" selected>Priority</option>
+                        <option value="due">Due date</option>
+                    </select>
 
-                        <select id="categoryFilter" class="sort-select" aria-label="Filter by category">
-                            <option value="all">All categories</option>
-                            <option value="School">School</option>
-                            <option value="Home">Home</option>
-                            <option value="Work">Work</option>
-                            <option value="Personal">Personal</option>
-                        </select>
+                    <select id="categoryFilter" class="sort-select" aria-label="Filter by category">
+                        <option value="all">All categories</option>
+                        <option value="School">School</option>
+                        <option value="Home">Home</option>
+                        <option value="Work">Work</option>
+                        <option value="Personal">Personal</option>
+                    </select>
             </div>
 
             <ul id="taskList" class="task-list" aria-live="polite"></ul>
