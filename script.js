@@ -49,6 +49,9 @@ const QUOTES = [
     "Your future self will thank you for what you do today."
 ];
 
+const PRIORITY_OPTIONS = [["low", "Low"], ["medium", "Medium"], ["high", "High"]];
+const CATEGORY_OPTIONS = [["", "No category"], ["School", "School"], ["Home", "Home"], ["Work", "Work"], ["Personal", "Personal"]];
+
 let tasks = [];
 let nextId = 1;
 let activeFilter = "all";
@@ -480,55 +483,103 @@ toggleAllBtn.addEventListener("click", () => {
     render();
 });
 
+function buildSelect(options, selected, label) {
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", label);
+    options.forEach(([value, text]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = text;
+        select.appendChild(option);
+    });
+    select.value = selected;
+    return select;
+}
+
 function startEditing(li, task) {
-    if (li.querySelector(".task-edit-input")) return;
+    if (li.querySelector(".edit-form")) return;
 
     li.draggable = false;
 
     const body = li.querySelector(".task-body");
-    const span = body.querySelector(".task-text");
-    const topRow = body.querySelector(".task-top");
+    const actions = li.querySelector(".task-actions");
+    body.innerHTML = "";
+    actions.style.display = "none";
 
-    const editInput = document.createElement("input");
-    editInput.type = "text";
-    editInput.className = "task-edit-input";
-    editInput.value = task.text;
-    editInput.maxLength = 120;
+    const form = document.createElement("div");
+    form.className = "edit-form";
 
-    topRow.replaceChild(editInput, span);
-    editInput.focus();
-    editInput.select();
+    const textInput = document.createElement("input");
+    textInput.type = "text";
+    textInput.className = "task-edit-input";
+    textInput.value = task.text;
+    textInput.maxLength = 120;
+    textInput.setAttribute("aria-label", "Task text");
 
-    let finished = false;
+    const prioritySelect = buildSelect(PRIORITY_OPTIONS, task.priority, "Priority");
+    const categorySelect = buildSelect(CATEGORY_OPTIONS, task.category || "", "Category");
 
-    function finishEditing(save) {
-        if (finished) return;
-        finished = true;
-        const newText = editInput.value.trim();
-        let message = "";
+    const dateField = document.createElement("input");
+    dateField.type = "date";
+    dateField.value = task.dueDate || "";
+    dateField.setAttribute("aria-label", "Due date");
 
-        if (save) {
-            if (newText === "") {
-                message = "A task can't be empty. Your original text was kept.";
-            } else if (isDuplicateTask(newText, task.id)) {
-                message = "That task is already on your list. Your original text was kept.";
-            } else {
-                task.text = newText;
-                saveTasks();
-            }
+    const buttons = document.createElement("div");
+    buttons.className = "edit-buttons";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "save-btn";
+    saveBtn.textContent = "Save";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.className = "icon-btn";
+    cancelBtn.textContent = "Cancel";
+
+    function save() {
+        const newText = textInput.value.trim();
+        if (newText === "") {
+            alert("A task can't be empty.");
+            textInput.focus();
+            return;
         }
-
+        if (isDuplicateTask(newText, task.id)) {
+            alert("That task is already on your list.");
+            textInput.focus();
+            return;
+        }
+        task.text = newText;
+        task.priority = prioritySelect.value;
+        task.category = categorySelect.value;
+        task.dueDate = dateField.value || null;
+        saveTasks();
         render();
-        // FIX: explain why the edit was rejected instead of failing silently
-        if (message) alert(message);
     }
 
-    editInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") finishEditing(true);
-        if (event.key === "Escape") finishEditing(false);
+    saveBtn.addEventListener("click", save);
+    cancelBtn.addEventListener("click", () => render());
+
+    form.addEventListener("keydown", (event) => {
+        const tag = event.target.tagName;
+        if (event.key === "Enter" && tag !== "SELECT" && tag !== "BUTTON") {
+            event.preventDefault();
+            save();
+        }
+        if (event.key === "Escape") render();
     });
 
-    editInput.addEventListener("blur", () => finishEditing(true));
+    buttons.appendChild(saveBtn);
+    buttons.appendChild(cancelBtn);
+    form.appendChild(textInput);
+    form.appendChild(prioritySelect);
+    form.appendChild(categorySelect);
+    form.appendChild(dateField);
+    form.appendChild(buttons);
+    body.appendChild(form);
+
+    textInput.focus();
+    textInput.select();
 }
 
 filterButtons.forEach((btn) => {

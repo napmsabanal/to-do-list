@@ -665,6 +665,41 @@ body[data-bg="dots"] {
     cursor: default;
 }
 
+.edit-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-form .task-edit-input {
+    flex: 1 1 100%;
+}
+
+.edit-form select,
+.edit-form input[type="date"] {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 13px;
+    color: var(--slate);
+    background: var(--panel);
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.save-btn {
+    background: var(--accent);
+    color: white;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
 @media (hover: none) {
     .move-btn {
         display: inline-block;
