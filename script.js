@@ -187,7 +187,16 @@ function moveToTrash(list) {
 }
 
 function restoreTask(index) {
-    const [task] = trash.splice(index, 1);
+    const task = trash[index];
+    if (!task) return;
+
+    // FIX: don't restore a task that already exists on the list
+    if (isDuplicateTask(task.text)) {
+        alert('"' + task.text + '" is already on your list. Rename or delete it first, then restore.');
+        return;
+    }
+
+    trash.splice(index, 1);
     tasks.push({ ...task, id: nextId++ });
     saveTasks();
     saveTrash();
@@ -195,11 +204,24 @@ function restoreTask(index) {
 }
 
 function restoreAll() {
-    trash.forEach((task) => tasks.push({ ...task, id: nextId++ }));
-    trash = [];
+    const skipped = [];
+
+    trash.forEach((task) => {
+        if (isDuplicateTask(task.text)) {
+            skipped.push(task);
+        } else {
+            tasks.push({ ...task, id: nextId++ });
+        }
+    });
+
+    trash = skipped; // duplicates stay in the trash
     saveTasks();
     saveTrash();
     render();
+
+    if (skipped.length > 0) {
+        alert(skipped.length + " task(s) were not restored because they already exist on your list.");
+    }
 }
 
 function emptyTrash() {
