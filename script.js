@@ -491,12 +491,22 @@ function startEditing(li, task) {
         if (finished) return;
         finished = true;
         const newText = editInput.value.trim();
-        // FIX: don't allow an edit to create a duplicate of another task
-        if (save && newText !== "" && !isDuplicateTask(newText, task.id)) {
-            task.text = newText;
-            saveTasks();
+        let message = "";
+
+        if (save) {
+            if (newText === "") {
+                message = "A task can't be empty. Your original text was kept.";
+            } else if (isDuplicateTask(newText, task.id)) {
+                message = "That task is already on your list. Your original text was kept.";
+            } else {
+                task.text = newText;
+                saveTasks();
+            }
         }
+
         render();
+        // FIX: explain why the edit was rejected instead of failing silently
+        if (message) alert(message);
     }
 
     editInput.addEventListener("keydown", (event) => {
