@@ -648,7 +648,7 @@ function buildTaskItem(task) {
     checkbox.type = "checkbox";
     checkbox.className = "task-checkbox";
     checkbox.checked = task.completed;
-    checkbox.setAttribute("aria-label", "Mark task complete");
+    checkbox.setAttribute("aria-label", 'Mark "' + task.text + '" as complete');
     checkbox.addEventListener("change", () => toggleTask(task.id));
 
     const body = document.createElement("div");
