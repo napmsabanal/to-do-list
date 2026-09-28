@@ -71,6 +71,7 @@ let dragId = null;
 let toastTimer = null;
 let wasAllDone = null;
 let justCompletedId = null;
+let allowConfetti = false;
 
 showTodaysDate();
 showRandomQuote();
@@ -454,9 +455,11 @@ function toggleTask(id) {
     if (!task) return;
     setCompleted(task, !task.completed);
     if (task.completed) justCompletedId = id;
+    allowConfetti = true;
     saveTasks();
     render();
     justCompletedId = null;
+    allowConfetti = false;
 }
 
 /* ---------- Undo toast ---------- */
@@ -502,6 +505,9 @@ function deleteTask(id, li) {
     if (index === -1) return;
     const task = tasks[index];
 
+    // Ask before deleting (the Undo toast still appears afterwards)
+    if (!confirm('Delete "' + task.text + '"?')) return;
+
     li.classList.add("removing");
     setTimeout(() => {
         moveToTrash([task]);
@@ -524,8 +530,10 @@ clearCompletedBtn.addEventListener("click", () => {
 toggleAllBtn.addEventListener("click", () => {
     const allDone = tasks.every((t) => t.completed);
     tasks.forEach((t) => setCompleted(t, !allDone));
+    allowConfetti = true;
     saveTasks();
     render();
+    allowConfetti = false;
 });
 
 /* ---------- Editing ---------- */
@@ -753,7 +761,7 @@ function render() {
     const allDone = tasks.length > 0 && tasks.every((t) => t.completed);
     allDoneMsg.hidden = !allDone;
     // Confetti only when the list actually becomes fully complete (not on page load)
-    if (allDone && wasAllDone === false) launchConfetti();
+    if (allDone && wasAllDone === false && allowConfetti) launchConfetti();
     wasAllDone = allDone;
 
     renderStreak();
