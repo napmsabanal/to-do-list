@@ -422,6 +422,17 @@ function setCompleted(task, value) {
     }
 }
 
+// Move a task up (-1) or down (+1) in the list (for touch screens)
+function moveTask(id, direction) {
+    const from = tasks.findIndex((t) => t.id === id);
+    const to = from + direction;
+    if (from === -1 || to < 0 || to >= tasks.length) return;
+    const [moved] = tasks.splice(from, 1);
+    tasks.splice(to, 0, moved);
+    saveTasks();
+    render();
+}
+
 function toggleTask(id) {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
@@ -699,6 +710,30 @@ function buildTaskItem(task) {
     deleteBtn.setAttribute("aria-label", "Delete task");
     deleteBtn.addEventListener("click", () => deleteTask(task.id, li));
 
+        const canReorder = sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all";
+
+    // Up/down buttons so touch screens can reorder too (CSS shows them only on touch devices)
+    if (canReorder) {
+        const position = tasks.indexOf(task);
+
+        const upBtn = document.createElement("button");
+        upBtn.className = "icon-btn move-btn";
+        upBtn.textContent = "\u2191";
+        upBtn.setAttribute("aria-label", "Move task up");
+        upBtn.disabled = position === 0;
+        upBtn.addEventListener("click", () => moveTask(task.id, -1));
+
+        const downBtn = document.createElement("button");
+        downBtn.className = "icon-btn move-btn";
+        downBtn.textContent = "\u2193";
+        downBtn.setAttribute("aria-label", "Move task down");
+        downBtn.disabled = position === tasks.length - 1;
+        downBtn.addEventListener("click", () => moveTask(task.id, 1));
+
+        actions.appendChild(upBtn);
+        actions.appendChild(downBtn);
+    }
+
     actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
 
@@ -706,7 +741,7 @@ function buildTaskItem(task) {
     li.appendChild(body);
     li.appendChild(actions);
 
-    if (sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all") {
+    if (canReorder) {
         setupDrag(li, task);
     }
 

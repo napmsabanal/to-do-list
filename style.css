@@ -662,6 +662,21 @@ body[data-bg="dots"] {
     margin-top: 8px;
 }
 
+.move-btn {
+    display: none;
+}
+
+.move-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+@media (hover: none) {
+    .move-btn {
+        display: inline-block;
+    }
+}
+
 @media (max-width: 560px) {
     .app-header {
         flex-direction: column;
