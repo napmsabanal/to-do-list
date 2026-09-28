@@ -8,7 +8,7 @@
 :root[data-theme="light"] {
     --navy: #1e293b;
     --slate: #475569;
-    --slate-light: #94a3b8;
+    --slate-light: #64748b;
     --border: #e2e8f0;
     --bg: #f1f5f9;
     --panel: #ffffff;
@@ -24,7 +24,7 @@
 :root[data-theme="dark"] {
     --navy: #f1f5f9;
     --slate: #cbd5e1;
-    --slate-light: #7c8aa5;
+    --slate-light: #94a3b8;
     --border: #334155;
     --bg: #0f172a;
     --panel: #1e293b;
@@ -35,12 +35,13 @@
     --low: #38bdf8;
     --medium: #fbbf24;
     --high: #f87171;
+    color-scheme: dark;
 }
 
 :root[data-theme="yellow"] {
     --navy: #402c00;
     --slate: #78502b;
-    --slate-light: #a9895e;
+    --slate-light: #8a6a3d;
     --border: #fde68a;
     --bg: #fffbeb;
     --panel: #ffffff;
@@ -173,10 +174,6 @@ select:focus-visible {
 
 .task-item.drag-over {
     box-shadow: 0 -3px 0 var(--accent);
-}
-
-@media (max-width: 560px) {
-    .app-header h1 { font-size: 30px; }
 }
 
 .panel {
@@ -422,6 +419,8 @@ select:focus-visible {
     border-radius: 6px;
     padding: 6px 8px;
     outline: none;
+    background: var(--panel);
+    color: var(--navy);
 }
 
 .task-actions {
@@ -486,11 +485,6 @@ select:focus-visible {
 .priority-badge.low { color: var(--low); background: var(--accent-soft); }
 .priority-badge.medium { color: var(--medium); background: var(--accent-soft); }
 .priority-badge.high { color: var(--high); background: var(--danger-bg); }
-
-.task-edit-input {
-    background: var(--panel);
-    color: var(--navy);
-}
 
 .tools-row {
     display: flex;
@@ -683,6 +677,10 @@ body[data-bg="dots"] {
         gap: 6px;
     }
 
+    .app-header h1 { 
+        font-size: 30px; 
+    }
+
     .panel {
         padding: 18px;
     }
@@ -694,6 +692,19 @@ body[data-bg="dots"] {
     .task-input {
         flex: none;
         width: 100%;
+    }
+
+    .task-item {
+        flex-wrap: wrap;
+    }
+
+    .task-body {
+        flex: 1 1 60%;
+    }
+
+    .task-actions {
+        flex: 1 1 100%;
+        justify-content: flex-end;
     }
 
     #priorityInput,
