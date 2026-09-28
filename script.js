@@ -13,7 +13,8 @@ const searchInput = document.getElementById("searchInput");
 const sortInput = document.getElementById("sortInput");
 const progressLabel = document.getElementById("progressLabel");
 const progressPercent = document.getElementById("progressPercent");
-const progressFill = document.getElementById("progressFill");
+const progressRing = document.getElementById("progressRing");
+const RING_LENGTH = 113.1;
 const allDoneMsg = document.getElementById("allDoneMsg");
 const todayDateEl = document.getElementById("todayDate");
 const quoteEl = document.getElementById("quote");
@@ -825,7 +826,8 @@ function updateProgress() {
 
     progressLabel.textContent = completed + " of " + total + " tasks completed";
     progressPercent.textContent = percent + "%";
-    progressFill.style.width = percent + "%";
+    progressRing.style.strokeDashoffset = RING_LENGTH * (1 - percent / 100);
+    progressPercent.closest(".progress-ring").setAttribute("aria-valuenow", percent);
     progressFill.parentElement.setAttribute("aria-valuenow", percent);
 }
 

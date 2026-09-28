@@ -48,13 +48,14 @@
         <main class="panel">
 
             <section class="progress-section">
-                <div class="progress-labels">
-                    <span id="progressLabel">0 of 0 tasks completed</span>
-                    <span id="progressPercent">0%</span>
+                <div class="progress-ring" role="progressbar" aria-label="Task completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <svg viewBox="0 0 44 44" aria-hidden="true">
+                        <circle class="ring-track" cx="22" cy="22" r="18"></circle>
+                        <circle id="progressRing" class="ring-fill" cx="22" cy="22" r="18"></circle>
+                    </svg>
+                    <span id="progressPercent" class="ring-percent">0%</span>
                 </div>
-                <div class="progress-track" role="progressbar" aria-label="Task completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                    <div id="progressFill" class="progress-fill"></div>
-                </div>
+                <span id="progressLabel" class="progress-text">0 of 0 tasks completed</span>
             </section>
 
             <p id="allDoneMsg" class="all-done" hidden>🎉 All tasks completed! Great job!</p>
@@ -142,7 +143,6 @@
         <footer class="app-footer">
             <p>Marinelle's Week-4 &middot; Interactive To-Do List Project</p>
         </footer>
-
     </div>
 
 <script src="script.js"></script>
