@@ -33,7 +33,9 @@ const THEME_KEY = "taskflow.theme";
 const TRASH_KEY = "taskflow.trash";
 const STREAK_KEY = "taskflow.streakDays";
 const BG_KEY = "taskflow.background";
+const QUOTE_API = "https://dummyjson.com/quotes/random";
 
+// Fallback quotes, used if the API can't be reached
 const QUOTES = [
     "Start where you are. Use what you have. Do what you can.",
     "Small steps every day add up to big results.",
@@ -67,9 +69,22 @@ loadStreak();
 loadBackground();
 render();
 
-function showRandomQuote() {
+function showLocalQuote() {
     const index = Math.floor(Math.random() * QUOTES.length);
-    quoteEl.textContent = "“" + QUOTES[index] + "”";
+    quoteEl.textContent = "\u201C" + QUOTES[index] + "\u201D";
+}
+
+// Homework: fetch a random quote from an API and show it on the page
+async function showRandomQuote() {
+    try {
+        const response = await fetch(QUOTE_API);
+        if (!response.ok) throw new Error("Request failed: " + response.status);
+        const data = await response.json();
+        quoteEl.textContent = "\u201C" + data.quote + "\u201D \u2014 " + data.author;
+    } catch (err) {
+        console.error("Could not fetch quote, using a local one:", err);
+        showLocalQuote();
+    }
 }
 
 quoteEl.addEventListener("click", showRandomQuote);
@@ -188,6 +203,7 @@ function restoreAll() {
 }
 
 function emptyTrash() {
+    if (trash.length === 0) return; // FIX: nothing to delete
     if (!confirm("Permanently delete " + trash.length + " task(s)? This cannot be undone.")) return;
     trash = [];
     saveTrash();
@@ -260,9 +276,10 @@ function updateCharCount() {
     charCount.classList.toggle("near-limit", length >= 100);
 }
 
-function isDuplicateTask(text) {
+// excludeId lets the edit feature ignore the task being edited
+function isDuplicateTask(text, excludeId = null) {
     const normalized = text.trim().toLowerCase();
-    return tasks.some((t) => t.text.trim().toLowerCase() === normalized);
+    return tasks.some((t) => t.id !== excludeId && t.text.trim().toLowerCase() === normalized);
 }
 
 taskInput.addEventListener("input", () => {
@@ -279,6 +296,8 @@ function addTask() {
     const text = taskInput.value.trim();
 
     if (text === "") {
+        // Requirement: alert the user if the field is empty
+        alert("Please enter a task before adding it.");
         showFormError("Please describe the task before adding it.");
         taskInput.focus();
         return;
@@ -302,6 +321,8 @@ function addTask() {
     showFormError(null);
     taskInput.value = "";
     updateCharCount();
+    priorityInput.value = "medium";
+    categoryInput.value = "";
     dueDateInput.value = "";
     taskInput.focus();
 
@@ -351,7 +372,7 @@ function calculateStreak() {
 function renderStreak() {
     const count = calculateStreak();
     streakEl.textContent = count > 0
-        ? "🔥 " + count + "-day streak"
+        ? "\uD83D\uDD25 " + count + "-day streak"
         : "Complete a task to start your streak";
 }
 
@@ -364,6 +385,9 @@ function toggleTask(id) {
 }
 
 function deleteTask(id, li) {
+    // FIX: ignore clicks while the delete animation is already running
+    if (li.classList.contains("removing")) return;
+
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
 
@@ -421,7 +445,8 @@ function startEditing(li, task) {
         if (finished) return;
         finished = true;
         const newText = editInput.value.trim();
-        if (save && newText !== "") {
+        // FIX: don't allow an edit to create a duplicate of another task
+        if (save && newText !== "" && !isDuplicateTask(newText, task.id)) {
             task.text = newText;
             saveTasks();
         }
@@ -599,7 +624,7 @@ function buildTaskItem(task) {
     if (task.dueDate) {
         const due = document.createElement("span");
         due.className = "task-due" + (isOverdue(task) ? " overdue" : "");
-        due.textContent = (isOverdue(task) ? "Overdue — " : "Due ") + formatDueDate(task.dueDate);
+        due.textContent = (isOverdue(task) ? "Overdue \u2014 " : "Due ") + formatDueDate(task.dueDate);
         body.appendChild(due);
     }
 

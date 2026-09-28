@@ -406,7 +406,7 @@ select:focus-visible {
 
 .task-due {
     font-size: 12px;
-    color: var(--danger);
+    color: var(--slate-light);
 }
 
 .task-due.overdue {
