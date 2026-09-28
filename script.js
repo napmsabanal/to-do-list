@@ -157,7 +157,11 @@ function saveTasks() {
 function loadTasks() {
     try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        tasks = saved.map((t) => ({ ...t, id: nextId++ }));
+        tasks = saved.map((t) => ({
+            ...t,
+            priority: ["low", "medium", "high"].includes(t.priority) ? t.priority : "medium",
+            id: nextId++
+        }));
     } catch (err) {
         console.error("Could not load saved tasks:", err);
         tasks = [];
@@ -471,7 +475,6 @@ clearCompletedBtn.addEventListener("click", () => {
 
 toggleAllBtn.addEventListener("click", () => {
     const allDone = tasks.every((t) => t.completed);
-    if (!allDone) recordCompletion();
     tasks.forEach((t) => setCompleted(t, !allDone));
     saveTasks();
     render();
@@ -710,7 +713,7 @@ function buildTaskItem(task) {
     deleteBtn.setAttribute("aria-label", "Delete task");
     deleteBtn.addEventListener("click", () => deleteTask(task.id, li));
 
-        const canReorder = sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all";
+    const canReorder = sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all";
 
     // Up/down buttons so touch screens can reorder too (CSS shows them only on touch devices)
     if (canReorder) {
@@ -756,4 +759,5 @@ function updateProgress() {
     progressLabel.textContent = completed + " of " + total + " tasks completed";
     progressPercent.textContent = percent + "%";
     progressFill.style.width = percent + "%";
+    progressFill.parentElement.setAttribute("aria-valuenow", percent);
 }
