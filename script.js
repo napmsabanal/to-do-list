@@ -6,6 +6,8 @@ const formError = document.getElementById("formError");
 const charCount = document.getElementById("charCount");
 const taskList = document.getElementById("taskList");
 const emptyState = document.getElementById("emptyState");
+const emptyIcon = document.getElementById("emptyIcon");
+const emptyText = document.getElementById("emptyText");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const clearCompletedBtn = document.getElementById("clearCompletedBtn");
 const toggleAllBtn = document.getElementById("toggleAllBtn");
@@ -14,7 +16,6 @@ const sortInput = document.getElementById("sortInput");
 const progressLabel = document.getElementById("progressLabel");
 const progressPercent = document.getElementById("progressPercent");
 const progressRing = document.getElementById("progressRing");
-const RING_LENGTH = 113.1;
 const allDoneMsg = document.getElementById("allDoneMsg");
 const todayDateEl = document.getElementById("todayDate");
 const quoteEl = document.getElementById("quote");
@@ -28,6 +29,9 @@ const categoryInput = document.getElementById("categoryInput");
 const categoryFilter = document.getElementById("categoryFilter");
 const bgSelect = document.getElementById("bgSelect");
 const themeButtons = document.querySelectorAll(".theme-btn");
+const toastEl = document.getElementById("toast");
+const toastMessage = document.getElementById("toastMessage");
+const toastAction = document.getElementById("toastAction");
 
 const STORAGE_KEY = "taskflow.tasks";
 const THEME_KEY = "taskflow.theme";
@@ -35,6 +39,7 @@ const TRASH_KEY = "taskflow.trash";
 const STREAK_KEY = "taskflow.streakDays";
 const BG_KEY = "taskflow.background";
 const QUOTE_API = "https://dummyjson.com/quotes/random";
+const RING_LENGTH = 113.1; // circle circumference (2 x pi x 18)
 
 // Fallback quotes, used if the API can't be reached
 const QUOTES = [
@@ -63,6 +68,9 @@ let trashOpen = false;
 let activeCategory = "all";
 let streakDays = [];
 let dragId = null;
+let toastTimer = null;
+let wasAllDone = null;
+let justCompletedId = null;
 
 showTodaysDate();
 showRandomQuote();
@@ -198,7 +206,7 @@ function restoreTask(index) {
     const task = trash[index];
     if (!task) return;
 
-    // FIX: don't restore a task that already exists on the list
+    // Don't restore a task that already exists on the list
     if (isDuplicateTask(task.text)) {
         alert('"' + task.text + '" is already on your list. Rename or delete it first, then restore.');
         return;
@@ -233,7 +241,7 @@ function restoreAll() {
 }
 
 function emptyTrash() {
-    if (trash.length === 0) return; // FIX: nothing to delete
+    if (trash.length === 0) return; // nothing to delete
     if (!confirm("Permanently delete " + trash.length + " task(s)? This cannot be undone.")) return;
     trash = [];
     saveTrash();
@@ -406,7 +414,7 @@ function renderStreak() {
         : "Complete a task to start your streak";
 }
 
-// FIX: if nothing is completed today anymore, take today back off the streak
+// If nothing is completed today anymore, take today back off the streak
 function refreshTodayStreak() {
     const today = getDateStr(new Date());
     if (tasks.some((t) => t.completedOn === today)) return;
@@ -445,19 +453,54 @@ function toggleTask(id) {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
     setCompleted(task, !task.completed);
+    if (task.completed) justCompletedId = id;
     saveTasks();
+    render();
+    justCompletedId = null;
+}
+
+/* ---------- Undo toast ---------- */
+
+function shorten(text) {
+    return text.length > 30 ? text.slice(0, 30) + "\u2026" : text;
+}
+
+function hideToast() {
+    toastEl.hidden = true;
+}
+
+function showToast(message, actionLabel, onAction) {
+    clearTimeout(toastTimer);
+    toastMessage.textContent = message;
+    toastAction.textContent = actionLabel;
+    toastAction.onclick = () => {
+        hideToast();
+        onAction();
+    };
+    toastEl.hidden = false;
+    toastTimer = setTimeout(hideToast, 6000);
+}
+
+function undoDelete(task, index) {
+    if (isDuplicateTask(task.text)) {
+        alert('"' + task.text + '" is already on your list, so it cannot be restored.');
+        return;
+    }
+    const trashIndex = trash.indexOf(task);
+    if (trashIndex !== -1) trash.splice(trashIndex, 1);
+    tasks.splice(Math.min(index, tasks.length), 0, task);
+    saveTasks();
+    saveTrash();
     render();
 }
 
 function deleteTask(id, li) {
-    // FIX: ignore clicks while the delete animation is already running
+    // Ignore clicks while the delete animation is already running
     if (li.classList.contains("removing")) return;
 
-    const task = tasks.find((t) => t.id === id);
-    if (!task) return;
-
-    const ok = confirm('Delete "' + task.text + '"? This cannot be undone.');
-    if (!ok) return;
+    const index = tasks.findIndex((t) => t.id === id);
+    if (index === -1) return;
+    const task = tasks[index];
 
     li.classList.add("removing");
     setTimeout(() => {
@@ -465,6 +508,7 @@ function deleteTask(id, li) {
         tasks = tasks.filter((t) => t.id !== id);
         saveTasks();
         render();
+        showToast('Deleted "' + shorten(task.text) + '"', "Undo", () => undoDelete(task, index));
     }, 180);
 }
 
@@ -483,6 +527,8 @@ toggleAllBtn.addEventListener("click", () => {
     saveTasks();
     render();
 });
+
+/* ---------- Editing ---------- */
 
 function buildSelect(options, selected, label) {
     const select = document.createElement("select");
@@ -583,6 +629,8 @@ function startEditing(li, task) {
     textInput.select();
 }
 
+/* ---------- Filters, sorting, search ---------- */
+
 filterButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
         activeFilter = btn.dataset.filter;
@@ -631,6 +679,8 @@ searchInput.addEventListener("input", () => {
     render();
 });
 
+/* ---------- Dates ---------- */
+
 function isOverdue(task) {
     if (!task.dueDate || task.completed) return false;
     return task.dueDate < getDateStr(new Date());
@@ -651,6 +701,38 @@ function getDueText(task) {
     return "Due " + formatDueDate(task.dueDate);
 }
 
+/* ---------- Rendering ---------- */
+
+function launchConfetti() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const colors = ["#4f46e5", "#f59e0b", "#10b981", "#ef4444", "#0ea5e9", "#ec4899"];
+    for (let i = 0; i < 60; i++) {
+        const piece = document.createElement("span");
+        piece.className = "confetti-piece";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * 0.5 + "s";
+        piece.style.animationDuration = 2 + Math.random() * 1.5 + "s";
+        piece.style.setProperty("--drift", Math.random() * 200 - 100 + "px");
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 4500);
+    }
+}
+
+function updateFilterCounts() {
+    const counts = {
+        all: tasks.length,
+        active: tasks.filter((t) => !t.completed).length,
+        completed: tasks.filter((t) => t.completed).length,
+    };
+    filterButtons.forEach((btn) => {
+        const name = btn.dataset.filter;
+        const label = name.charAt(0).toUpperCase() + name.slice(1);
+        btn.textContent = label + " (" + counts[name] + ")";
+    });
+}
+
 function render() {
     const visibleTasks = getVisibleTasks();
 
@@ -658,16 +740,21 @@ function render() {
     visibleTasks.forEach((task) => taskList.appendChild(buildTaskItem(task)));
 
     emptyState.hidden = visibleTasks.length !== 0;
-    emptyState.textContent =
+    emptyIcon.textContent = tasks.length === 0 ? "\uD83D\uDCDD" : "\uD83D\uDD0D";
+    emptyText.textContent =
         tasks.length === 0
-            ? "No tasks yet — add one above to get started."
+            ? "No tasks yet \u2014 add one above to get started."
             : "Nothing to show in this view.";
 
     clearCompletedBtn.hidden = !tasks.some((t) => t.completed);
     toggleAllBtn.hidden = tasks.length === 0;
     toggleAllBtn.textContent = tasks.every((t) => t.completed) ? "Mark all active" : "Mark all complete";
 
-    allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
+    const allDone = tasks.length > 0 && tasks.every((t) => t.completed);
+    allDoneMsg.hidden = !allDone;
+    // Confetti only when the list actually becomes fully complete (not on page load)
+    if (allDone && wasAllDone === false) launchConfetti();
+    wasAllDone = allDone;
 
     renderStreak();
     updateFilterCounts();
@@ -718,8 +805,13 @@ function setupDrag(li, task) {
 }
 
 function buildTaskItem(task) {
+    const canReorder = sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all";
+
     const li = document.createElement("li");
-    li.className = "task-item priority-" + task.priority + (task.completed ? " completed" : "");
+    li.className =
+        "task-item priority-" + task.priority +
+        (task.completed ? " completed" : "") +
+        (task.id === justCompletedId ? " just-completed" : "");
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -747,7 +839,7 @@ function buildTaskItem(task) {
 
     if (task.category) {
         const categoryBadge = document.createElement("span");
-        categoryBadge.className = "category-badge";
+        categoryBadge.className = "category-badge cat-" + task.category.toLowerCase();
         categoryBadge.textContent = task.category;
         topRow.appendChild(categoryBadge);
     }
@@ -765,7 +857,7 @@ function buildTaskItem(task) {
 
         if (dueToday) li.classList.add("due-today");
     }
-    
+
     const actions = document.createElement("div");
     actions.className = "task-actions";
 
@@ -780,8 +872,6 @@ function buildTaskItem(task) {
     deleteBtn.textContent = "Delete";
     deleteBtn.setAttribute("aria-label", "Delete task");
     deleteBtn.addEventListener("click", () => deleteTask(task.id, li));
-
-    const canReorder = sortBy === "added" && activeFilter === "all" && !searchQuery && activeCategory === "all";
 
     // Up/down buttons so touch screens can reorder too (CSS shows them only on touch devices)
     if (canReorder) {
@@ -808,6 +898,15 @@ function buildTaskItem(task) {
     actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
 
+    if (canReorder) {
+        const handle = document.createElement("span");
+        handle.className = "drag-handle";
+        handle.textContent = "\u22EE\u22EE";
+        handle.title = "Drag to reorder";
+        handle.setAttribute("aria-hidden", "true");
+        li.appendChild(handle);
+    }
+
     li.appendChild(checkbox);
     li.appendChild(body);
     li.appendChild(actions);
@@ -828,18 +927,4 @@ function updateProgress() {
     progressPercent.textContent = percent + "%";
     progressRing.style.strokeDashoffset = RING_LENGTH * (1 - percent / 100);
     progressPercent.closest(".progress-ring").setAttribute("aria-valuenow", percent);
-    progressFill.parentElement.setAttribute("aria-valuenow", percent);
-}
-
-function updateFilterCounts() {
-    const counts = {
-        all: tasks.length,
-        active: tasks.filter((t) => !t.completed).length,
-        completed: tasks.filter((t) => t.completed).length,
-    };
-    filterButtons.forEach((btn) => {
-        const name = btn.dataset.filter;
-        const label = name.charAt(0).toUpperCase() + name.slice(1);
-        btn.textContent = label + " (" + counts[name] + ")";
-    });
 }
