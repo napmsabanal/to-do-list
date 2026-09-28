@@ -659,6 +659,7 @@ function render() {
     allDoneMsg.hidden = !(tasks.length > 0 && tasks.every((t) => t.completed));
 
     renderStreak();
+    updateFilterCounts();
     renderTrash();
     updateProgress();
 }
@@ -811,4 +812,17 @@ function updateProgress() {
     progressPercent.textContent = percent + "%";
     progressFill.style.width = percent + "%";
     progressFill.parentElement.setAttribute("aria-valuenow", percent);
+}
+
+function updateFilterCounts() {
+    const counts = {
+        all: tasks.length,
+        active: tasks.filter((t) => !t.completed).length,
+        completed: tasks.filter((t) => t.completed).length,
+    };
+    filterButtons.forEach((btn) => {
+        const name = btn.dataset.filter;
+        const label = name.charAt(0).toUpperCase() + name.slice(1);
+        btn.textContent = label + " (" + counts[name] + ")";
+    });
 }
