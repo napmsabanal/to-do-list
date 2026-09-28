@@ -376,10 +376,34 @@ function renderStreak() {
         : "Complete a task to start your streak";
 }
 
+// FIX: if nothing is completed today anymore, take today back off the streak
+function refreshTodayStreak() {
+    const today = getDateStr(new Date());
+    if (tasks.some((t) => t.completedOn === today)) return;
+    if (!streakDays.includes(today)) return;
+    streakDays = streakDays.filter((d) => d !== today);
+    try {
+        localStorage.setItem(STREAK_KEY, JSON.stringify(streakDays));
+    } catch (err) {
+        console.error("Could not save streak:", err);
+    }
+}
+
+function setCompleted(task, value) {
+    task.completed = value;
+    if (value) {
+        task.completedOn = getDateStr(new Date());
+        recordCompletion();
+    } else {
+        delete task.completedOn;
+        refreshTodayStreak();
+    }
+}
+
 function toggleTask(id) {
     const task = tasks.find((t) => t.id === id);
-    if (task) task.completed = !task.completed;
-    if (task && task.completed) recordCompletion();
+    if (!task) return;
+    setCompleted(task, !task.completed);
     saveTasks();
     render();
 }
@@ -415,7 +439,7 @@ clearCompletedBtn.addEventListener("click", () => {
 toggleAllBtn.addEventListener("click", () => {
     const allDone = tasks.every((t) => t.completed);
     if (!allDone) recordCompletion();
-    tasks.forEach((t) => (t.completed = !allDone));
+    tasks.forEach((t) => setCompleted(t, !allDone));
     saveTasks();
     render();
 });
