@@ -66,15 +66,7 @@
             <p id="allDoneMsg" class="all-done" hidden>🎉 All tasks completed! Great job!</p>
 
             <form id="taskForm" class="task-form">
-                <input
-                    type="text"
-                    id="taskInput"
-                    class="task-input"
-                    placeholder="What do you need to do?"
-                    autocomplete="off"
-                    maxlength="120"
-                    aria-label="Task description"
-                >
+                <input type="text" id="taskInput" class="task-input" placeholder="What do you need to do?" autocomplete="off" maxlength="120" aria-label="Task description">
 
                 <select id="priorityInput" aria-label="Priority">
                     <option value="low">Low</option>
@@ -91,7 +83,6 @@
                 </select>
 
                 <input type="date" id="dueDateInput" aria-label="Due date (optional)">
-
                 <button type="submit" id="addTaskBtn">Add Task</button>
             </form>
 
@@ -99,16 +90,16 @@
             <p id="charCount" class="char-count">0 / 120</p>
 
             <div class="filter-row">
-                <div class="filter-tabs" role="tablist">
-                    <button class="filter-btn active" data-filter="all" role="tab" aria-selected="true">All</button>
-                    <button class="filter-btn" data-filter="active" role="tab" aria-selected="false">Active</button>
-                    <button class="filter-btn" data-filter="completed" role="tab" aria-selected="false">Completed</button>
+                <div class="filter-tabs" role="group" aria-label="Task filter">
+                    <button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+                    <button type="button" class="filter-btn" data-filter="active" aria-pressed="false">Active</button>
+                    <button type="button" class="filter-btn" data-filter="completed" aria-pressed="false">Completed</button>
                 </div>
 
                 <div class="row-actions">
-                    <button id="toggleAllBtn" class="clear-completed-btn" hidden>Mark all complete</button>
-                    <button id="clearCompletedBtn" class="clear-completed-btn" hidden>Clear completed</button>
-                    <button id="trashToggleBtn" class="clear-completed-btn">Trash (0)</button>
+                    <button type="button" id="toggleAllBtn" class="clear-completed-btn" hidden>Mark all complete</button>
+                    <button type="button" id="clearCompletedBtn" class="clear-completed-btn" hidden>Clear completed</button>
+                    <button type="button" id="trashToggleBtn" class="clear-completed-btn">Trash (0)</button>
                 </div>
             </div>
 
@@ -141,8 +132,8 @@
                 <div class="trash-header">
                     <h2>Deleted tasks</h2>
                     <div class="row-actions">
-                        <button id="restoreAllBtn" class="clear-completed-btn">Restore all</button>
-                        <button id="emptyTrashBtn" class="clear-completed-btn">Empty trash</button>
+                        <button type="button" id="restoreAllBtn" class="clear-completed-btn">Restore all</button>
+                        <button type="button" id="emptyTrashBtn" class="clear-completed-btn">Empty trash</button>
                     </div>
                 </div>
                 <ul id="trashList" class="trash-list"></ul>

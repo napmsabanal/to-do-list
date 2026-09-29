@@ -112,7 +112,8 @@ function applyTheme(theme) {
 function loadTheme() {
     let theme = "light";
     try {
-        theme = localStorage.getItem(THEME_KEY) || "light";
+        const saved = localStorage.getItem(THEME_KEY);
+        theme = ["light", "dark", "yellow"].includes(saved) ? saved : "light";
     } catch (err) {
         console.error("Could not load saved theme:", err);
     }
@@ -143,7 +144,9 @@ function applyBackground(name) {
 function loadBackground() {
     let name = "default";
     try {
-        name = localStorage.getItem(BG_KEY) || "default";
+        const saved = localStorage.getItem(BG_KEY);
+        const allowed = ["default", "sunset", "ocean", "forest", "lavender", "dots"];
+        name = allowed.includes(saved) ? saved : "default";
     } catch (err) {
         console.error("Could not load background:", err);
     }
@@ -169,12 +172,21 @@ function saveTasks() {
 
 function loadTasks() {
     try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!Array.isArray(saved)) {
+            tasks = [];
+            return;
+        }
         tasks = saved.map((t) => ({
             ...t,
+            id: nextId++,
+            text: typeof t.text === "string" ? t.text.trim() : "",
+            completed: Boolean(t.completed),
+            completedOn: typeof t.completedOn === "string" ? t.completedOn : undefined,
+            category: typeof t.category === "string" ? t.category : "",
             priority: ["low", "medium", "high"].includes(t.priority) ? t.priority : "medium",
-            id: nextId++
-        }));
+            dueDate: typeof t.dueDate === "string" && t.dueDate ? t.dueDate : null,
+        })).filter((t) => t.text);
     } catch (err) {
         console.error("Could not load saved tasks:", err);
         tasks = [];
@@ -191,7 +203,8 @@ function saveTrash() {
 
 function loadTrash() {
     try {
-        trash = JSON.parse(localStorage.getItem(TRASH_KEY)) || [];
+        const saved = JSON.parse(localStorage.getItem(TRASH_KEY));
+        trash = Array.isArray(saved) ? saved.filter((t) => t && typeof t.text === "string" && t.text.trim()) : [];
     } catch (err) {
         console.error("Could not load trash:", err);
         trash = [];
@@ -215,6 +228,7 @@ function restoreTask(index) {
 
     trash.splice(index, 1);
     tasks.push({ ...task, id: nextId++ });
+    if (task.completed && task.completedOn === getDateStr(new Date())) recordCompletion();
     saveTasks();
     saveTrash();
     render();
@@ -228,6 +242,7 @@ function restoreAll() {
             skipped.push(task);
         } else {
             tasks.push({ ...task, id: nextId++ });
+            if (task.completed && task.completedOn === getDateStr(new Date())) recordCompletion();
         }
     });
 
@@ -379,7 +394,10 @@ function getDateStr(date) {
 
 function loadStreak() {
     try {
-        streakDays = JSON.parse(localStorage.getItem(STREAK_KEY)) || [];
+        const saved = JSON.parse(localStorage.getItem(STREAK_KEY));
+        streakDays = Array.isArray(saved)
+            ? [...new Set(saved.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)))]
+            : [];
     } catch (err) {
         console.error("Could not load streak:", err);
         streakDays = [];
@@ -492,6 +510,7 @@ function undoDelete(task, index) {
     const trashIndex = trash.indexOf(task);
     if (trashIndex !== -1) trash.splice(trashIndex, 1);
     tasks.splice(Math.min(index, tasks.length), 0, task);
+    if (task.completed && task.completedOn === getDateStr(new Date())) recordCompletion();
     saveTasks();
     saveTrash();
     render();
@@ -512,6 +531,7 @@ function deleteTask(id, li) {
     setTimeout(() => {
         moveToTrash([task]);
         tasks = tasks.filter((t) => t.id !== id);
+        refreshTodayStreak();
         saveTasks();
         render();
         showToast('Deleted "' + shorten(task.text) + '"', "Undo", () => undoDelete(task, index));
@@ -523,6 +543,7 @@ clearCompletedBtn.addEventListener("click", () => {
     if (!confirm("Move " + done.length + " completed task(s) to Trash?")) return;
     moveToTrash(done);
     tasks = tasks.filter((t) => !t.completed);
+    refreshTodayStreak();
     saveTasks();
     render();
 });
@@ -530,6 +551,7 @@ clearCompletedBtn.addEventListener("click", () => {
 toggleAllBtn.addEventListener("click", () => {
     const allDone = tasks.every((t) => t.completed);
     tasks.forEach((t) => setCompleted(t, !allDone));
+    refreshTodayStreak();
     allowConfetti = true;
     saveTasks();
     render();
