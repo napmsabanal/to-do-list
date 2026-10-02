@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Interactive To-Do List</title>
-<meta name="description" content="A simple interactive to-do list with priorities, categories, due dates and daily streaks.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M27 52l16 16 30-34' fill='none' stroke='white' stroke-width='11' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Interactive To-Do List</title>
+    <meta name="description" content="A to-do list with statuses, priorities, categories, due dates and daily streaks.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M27 52l16 16 30-34' fill='none' stroke='white' stroke-width='11' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="app">
 
+        <!-- ================= HEADER ================= -->
         <header class="app-header">
             <div class="brand">
                 <p class="brand-eyebrow">My Productivity</p>
                 <h1>To-Do List</h1>
                 <p class="tagline">Organize your tasks and stay motivated.</p>
                 <p id="quote" class="quote" title="Click for a new quote"></p>
-                <p id="streak" class="streak"></p>
+                <p id="streak" class="streak" aria-live="polite"></p>
             </div>
 
             <div class="header-side">
@@ -31,78 +31,137 @@
                     </svg>
                 </span>
 
-                <div class="theme-switcher" role="group" aria-label="Color theme">
-                    <button type="button" class="theme-btn active" data-theme="light" title="Light theme" aria-label="Light theme"></button>
-                    <button type="button" class="theme-btn" data-theme="dark" title="Black theme" aria-label="Black theme"></button>
-                    <button type="button" class="theme-btn" data-theme="yellow" title="Yellow theme" aria-label="Yellow theme"></button>
-                </div>
+                <!-- Appearance menu: theme + background in one place -->
+                <details class="appearance" id="appearance">
+                    <summary>Appearance</summary>
+                    <div class="appearance-menu">
+                        <p class="menu-label">Theme</p>
+                        <div class="theme-switcher" role="group" aria-label="Color theme">
+                            <button type="button" class="theme-btn active" data-theme="light" title="Light theme" aria-label="Light theme"></button>
+                            <button type="button" class="theme-btn" data-theme="dark" title="Black theme" aria-label="Black theme"></button>
+                            <button type="button" class="theme-btn" data-theme="yellow" title="Yellow theme" aria-label="Yellow theme"></button>
+                        </div>
 
-                <select id="bgSelect" class="bg-select" aria-label="Background">
-                    <option value="default">Background: Default</option>
-                    <option value="sunset">Sunset</option>
-                    <option value="ocean">Ocean</option>
-                    <option value="forest">Forest</option>
-                    <option value="lavender">Lavender</option>
-                    <option value="dots">Dots</option>
-                </select>
+                        <label class="menu-label" for="bgSelect">Background</label>
+                        <select id="bgSelect" class="bg-select">
+                            <option value="default">Default</option>
+                            <option value="sunset">Sunset</option>
+                            <option value="ocean">Ocean</option>
+                            <option value="forest">Forest</option>
+                            <option value="lavender">Lavender</option>
+                            <option value="sakura">Sakura</option>
+                            <option value="night">Night stars</option>
+                        </select>
+                    </div>
+                </details>
 
                 <p id="todayDate" class="today-date"></p>
             </div>
         </header>
 
-        <main class="panel">
+        <!-- ================= CARD 1: ADD A NEW TASK ================= -->
+        <section class="panel add-panel" aria-labelledby="addHeading">
+            <h2 id="addHeading" class="panel-title">
+                <span class="title-icon" aria-hidden="true">＋</span>
+                Add a new task
+            </h2>
 
+            <p class="add-description">Create a task, choose its status, and add optional details.</p>
+
+            <form id="taskForm" class="task-form" novalidate>
+                <div class="field field-wide">
+                    <label for="taskInput">Task</label>
+                    <input type="text" id="taskInput" class="task-input" placeholder="What do you need to do?" autocomplete="off" maxlength="120" aria-describedby="formError">
+                    <p id="formError" class="form-error" role="alert" aria-live="assertive" hidden></p>
+                </div>
+
+                <div class="field">
+                    <label for="statusInput">Status</label>
+                    <select id="statusInput">
+                        <option value="pending" selected>Pending</option>
+                        <option value="progress">In Progress</option>
+                        <option value="hold">On Hold</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="priorityInput">Priority</label>
+                    <select id="priorityInput">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="categoryInput">Category</label>
+                    <select id="categoryInput">
+                        <option value="">No category</option>
+                        <option value="School">School</option>
+                        <option value="Home">Home</option>
+                        <option value="Work">Work</option>
+                        <option value="Personal">Personal</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="dueDateInput">Due date</label>
+                    <input type="date" id="dueDateInput">
+                </div>
+
+                <div class="add-button-row">
+                    <button type="submit" id="addTaskBtn">+ Add Task</button>
+                </div>
+            </form>
+
+            <p id="charCount" class="char-count">0 / 120</p>
+        </section>
+
+        <!-- ================= CARD 2: YOUR TASKS ================= -->
+        <main class="panel list-panel" aria-labelledby="listHeading">
+            <h2 id="listHeading" class="panel-title">
+                <span class="title-icon" aria-hidden="true">☰</span>
+                Your tasks
+            </h2>
+
+            <!-- PROGRESS -->
             <section class="progress-section">
-                <div class="progress-ring" role="progressbar" aria-label="Task completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="progress-ring" role="progressbar" aria-label="Task completion"
+                     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <svg viewBox="0 0 44 44" aria-hidden="true">
                         <circle class="ring-track" cx="22" cy="22" r="18"></circle>
                         <circle id="progressRing" class="ring-fill" cx="22" cy="22" r="18"></circle>
                     </svg>
                     <span id="progressPercent" class="ring-percent">0%</span>
                 </div>
-                <span id="progressLabel" class="progress-text">0 of 0 tasks completed</span>
+
+                <div class="progress-info">
+                    <span id="progressLabel" class="progress-text" aria-live="polite">0 of 0 tasks done</span>
+                    <div id="statusSummary" class="status-summary" aria-live="polite"></div>
+                </div>
+
+                <p id="allDoneMsg" class="all-done" role="status" hidden>🎉 All tasks are done! Great job!</p>
             </section>
 
-            <p id="allDoneMsg" class="all-done" hidden>🎉 All tasks completed! Great job!</p>
-
-            <form id="taskForm" class="task-form">
-                <input type="text" id="taskInput" class="task-input" placeholder="What do you need to do?" autocomplete="off" maxlength="120" aria-label="Task description">
-
-                <select id="priorityInput" aria-label="Priority">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
-                </select>
-
-                <select id="categoryInput" aria-label="Category">
-                    <option value="">No category</option>
-                    <option value="School">School</option>
-                    <option value="Home">Home</option>
-                    <option value="Work">Work</option>
-                    <option value="Personal">Personal</option>
-                </select>
-
-                <input type="date" id="dueDateInput" aria-label="Due date (optional)">
-                <button type="submit" id="addTaskBtn">Add Task</button>
-            </form>
-
-            <p id="formError" class="form-error" hidden></p>
-            <p id="charCount" class="char-count">0 / 120</p>
-
+            <!-- FILTERS -->
             <div class="filter-row">
-                <div class="filter-tabs" role="group" aria-label="Task filter">
+                <div class="filter-tabs" role="group" aria-label="Status filter">
                     <button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
-                    <button type="button" class="filter-btn" data-filter="active" aria-pressed="false">Active</button>
-                    <button type="button" class="filter-btn" data-filter="completed" aria-pressed="false">Completed</button>
+                    <button type="button" class="filter-btn" data-filter="pending" aria-pressed="false">Pending</button>
+                    <button type="button" class="filter-btn" data-filter="progress" aria-pressed="false">In Progress</button>
+                    <button type="button" class="filter-btn" data-filter="hold" aria-pressed="false">On Hold</button>
+                    <button type="button" class="filter-btn" data-filter="done" aria-pressed="false">Done</button>
                 </div>
 
                 <div class="row-actions">
-                    <button type="button" id="toggleAllBtn" class="clear-completed-btn" hidden>Mark all complete</button>
-                    <button type="button" id="clearCompletedBtn" class="clear-completed-btn" hidden>Clear completed</button>
-                    <button type="button" id="trashToggleBtn" class="clear-completed-btn">Trash (0)</button>
+                    <button type="button" id="toggleAllBtn" class="clear-completed-btn" hidden>Mark all done</button>
+                    <button type="button" id="clearCompletedBtn" class="clear-completed-btn" hidden>Clear done</button>
+                    <button type="button" id="trashToggleBtn" class="clear-completed-btn trash-icon-btn" title="Open trash (0)" aria-label="Open trash (0)"></button>
                 </div>
             </div>
 
+            <!-- SEARCH / SORT -->
             <div class="tools-row">
                 <input type="search" id="searchInput" class="search-input" placeholder="Search tasks..." aria-label="Search tasks">
 
@@ -110,6 +169,7 @@
                     <option value="added">Order added</option>
                     <option value="priority" selected>Priority</option>
                     <option value="due">Due date</option>
+                    <option value="status">Status</option>
                 </select>
 
                 <select id="categoryFilter" class="sort-select" aria-label="Filter by category">
@@ -121,36 +181,69 @@
                 </select>
             </div>
 
-            <ul id="taskList" class="task-list"></ul>
+            <!-- TASK LIST -->
+            <ul id="taskList" class="task-list" aria-live="polite"></ul>
 
             <div id="emptyState" class="empty-state">
                 <span id="emptyIcon" class="empty-icon" aria-hidden="true">📝</span>
-                <p id="emptyText">No tasks yet — add one above to get started.</p>
+                <h3 id="emptyTitle">No tasks yet</h3>
+                <p id="emptyText">Add your first task and start being productive!</p>
             </div>
-
-            <section id="trashPanel" class="trash-panel" hidden>
-                <div class="trash-header">
-                    <h2>Deleted tasks</h2>
-                    <div class="row-actions">
-                        <button type="button" id="restoreAllBtn" class="clear-completed-btn">Restore all</button>
-                        <button type="button" id="emptyTrashBtn" class="clear-completed-btn">Empty trash</button>
-                    </div>
-                </div>
-                <ul id="trashList" class="trash-list"></ul>
-            </section>
         </main>
 
+        <!-- ================= FOOTER ================= -->
         <footer class="app-footer">
             <p>Marinelle's Week-4 &middot; Interactive To-Do List Project</p>
         </footer>
-
     </div>
 
+    <!-- ================= TRASH MODAL ================= -->
+    <dialog id="trashPanel" class="trash-modal" aria-labelledby="trashHeading">
+        <div class="trash-modal-body">
+            <div class="trash-header">
+                <h2 id="trashHeading">Deleted tasks</h2>
+                <button type="button" id="closeTrashBtn" class="icon-btn" aria-label="Close trash">&#10005;</button>
+            </div>
+
+            <ul id="trashList" class="trash-list"></ul>
+
+            <div class="trash-footer">
+                <button type="button" id="restoreAllBtn" class="clear-completed-btn">Restore all</button>
+                <button type="button" id="emptyTrashBtn" class="clear-completed-btn">Empty trash</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- ================= NOTE POP-UP ================= -->
+    <dialog id="notePanel" class="trash-modal note-modal" aria-labelledby="noteHeading">
+        <div class="note-modal-body">
+            <div class="trash-header">
+                <h2 id="noteHeading">Task note</h2>
+                <button type="button" id="closeNoteBtn" class="icon-btn" aria-label="Close note">&#10005;</button>
+            </div>
+
+            <p id="noteTaskName" class="note-task-name"></p>
+
+            <label for="noteText" class="sr-only">Note</label>
+            <textarea id="noteText" class="note-text" maxlength="500" placeholder="Write a note for this task..."></textarea>
+            <p id="noteCount" class="note-count">0 / 500</p>
+
+            <div class="note-footer">
+                <button type="button" id="clearNoteBtn" class="clear-completed-btn">Clear note</button>
+                <div class="note-footer-actions">
+                    <button type="button" id="cancelNoteBtn" class="icon-btn">Cancel</button>
+                    <button type="button" id="saveNoteBtn" class="save-btn">Save note</button>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- ================= TOAST ================= -->
     <div id="toast" class="toast" role="status" aria-live="polite" hidden>
         <span id="toastMessage"></span>
         <button type="button" id="toastAction"></button>
     </div>
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
